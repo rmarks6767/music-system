@@ -1,0 +1,13 @@
+{
+  "name": "music-system",
+  "version": "1.0.0",
+  "description": "I will edit this later (I'll forget)",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "author": "rmarks6767",
+  "dependencies": {
+    "spotify-web-api-node": "^4.0.0"
+  }
+}
