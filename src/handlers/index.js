@@ -1,2 +1,2 @@
 export {default as exampleget} from './exampleget';
-export {default as login} from './login';
+export {default as connect} from './connect'
