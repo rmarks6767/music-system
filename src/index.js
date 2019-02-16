@@ -145,7 +145,11 @@ app.get('/refresh_token', function(req, res) {
 
 console.log('Listening on 8888');
 
-//app.get('/play', play);
+import {play} from './handlers';
+
+//const app = Express();
+
+app.get('/play', play.play);
 
 app.listen(8888);
 
