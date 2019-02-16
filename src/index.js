@@ -146,59 +146,34 @@ app.get('/refresh_token', function(req, res) {
 console.log('Listening on 8888');
 
 import {play} from './handlers';
-import {player} from './handlers';
+import {player} from './handlers'
 
-const onSpotifyWebPlaybackSDKReady = () => {
-    //const token = ;
-    const player = new player.Spotify.Player({
-        name: 'Car Music Player',
-        getOAuthToken: cb => { 
-            // requesting access token from refresh token
-            var refresh_token = req.query.refresh_token;
-            var authOptions = {
-                url: 'https://accounts.spotify.com/api/token',
-                headers: { 'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64')) },
-                form: {
-                grant_type: 'refresh_token',
-                refresh_token: refresh_token
-                },
-                json: true
-            };
+const Player = new Spotify.Player({
+  name: 'Car Music Player',
+  getOAuthToken: callback => {
+    // requesting access token from refresh token
+    var refresh_token = req.query.refresh_token;
+    var authOptions = {
+      url: 'https://accounts.spotify.com/api/token',
+      headers: { 'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64')) },
+      form: {
+        grant_type: 'refresh_token',
+        refresh_token: refresh_token
+      },
+      json: true
+    };
 
-            request.post(authOptions, function(error, response, body) {
-                if (!error && response.statusCode === 200) {
-                var access_token = body.access_token;
-                res.send({
-                    'access_token': access_token
-                });
-                }
-            });
-        }
+    request.post(authOptions, function(error, response, body) {
+      if (!error && response.statusCode === 200) {
+        var access_token = body.access_token;
+        res.send({
+          'access_token': access_token
+        });
+      }
     });
+  }
+});
 
-    // Error handling
-    player.addListener('initialization_error', ({ message }) => { console.error(message); });
-    player.addListener('authentication_error', ({ message }) => { console.error(message); });
-    player.addListener('account_error', ({ message }) => { console.error(message); });
-    player.addListener('playback_error', ({ message }) => { console.error(message); });
-
-    // Playback status updates
-    player.addListener('player_state_changed', state => { console.log(state); });
-
-    // Ready
-    player.addListener('ready', ({ device_id }) => {
-    console.log('Ready with Device ID', device_id);
-    });
-
-    // Not Ready
-    player.addListener('not_ready', ({ device_id }) => {
-    console.log('Device ID has gone offline', device_id);
-    });
-
-    // Connect to the player!
-    player.connect();
-};
-onSpotifyWebPlaybackSDKReady();
 app.get('/play', play.play);
 
 app.listen(8888);
