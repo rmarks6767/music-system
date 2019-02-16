@@ -146,39 +146,59 @@ app.get('/refresh_token', function(req, res) {
 console.log('Listening on 8888');
 
 import {play} from './handlers';
+import {player} from './handlers';
 
-//const app = Express();
+const onSpotifyWebPlaybackSDKReady = () => {
+    //const token = ;
+    const player = new player.Spotify.Player({
+        name: 'Car Music Player',
+        getOAuthToken: cb => { 
+            // requesting access token from refresh token
+            var refresh_token = req.query.refresh_token;
+            var authOptions = {
+                url: 'https://accounts.spotify.com/api/token',
+                headers: { 'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64')) },
+                form: {
+                grant_type: 'refresh_token',
+                refresh_token: refresh_token
+                },
+                json: true
+            };
 
+            request.post(authOptions, function(error, response, body) {
+                if (!error && response.statusCode === 200) {
+                var access_token = body.access_token;
+                res.send({
+                    'access_token': access_token
+                });
+                }
+            });
+        }
+    });
+
+    // Error handling
+    player.addListener('initialization_error', ({ message }) => { console.error(message); });
+    player.addListener('authentication_error', ({ message }) => { console.error(message); });
+    player.addListener('account_error', ({ message }) => { console.error(message); });
+    player.addListener('playback_error', ({ message }) => { console.error(message); });
+
+    // Playback status updates
+    player.addListener('player_state_changed', state => { console.log(state); });
+
+    // Ready
+    player.addListener('ready', ({ device_id }) => {
+    console.log('Ready with Device ID', device_id);
+    });
+
+    // Not Ready
+    player.addListener('not_ready', ({ device_id }) => {
+    console.log('Device ID has gone offline', device_id);
+    });
+
+    // Connect to the player!
+    player.connect();
+};
+onSpotifyWebPlaybackSDKReady();
 app.get('/play', play.play);
 
 app.listen(8888);
-
-/*import Spotify from 'spotify-web-api-node';
-import Express from 'express';
-import {refresh_token} from './handlers';
-import {callback} from './handlers';
-import {login} from './handlers';
-import cors from 'cors';
-import cookieParser from 'cookie-parser';
-
-
-const client_id = process.env.CLIENTKEY; // Your client id
-const client_secret = process.env.SECRETKEY; // Your secret
-const redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri
-
-const app = Express();
-const port = 8888;
-
-app.get('/', function(req,res) {
-    let stateKey = 'spotify_auth_state';
-    app.use(Express.static(__dirname + '/public'))
-    .use(cors())
-    .use(cookieParser());
-});
-app.get('/login', login.login); //(client_id, redirect_uri, res)
-app.get('/callback', callback.callback); //(client_id, client_secret, redirect_uri, req, res)
-app.get('/refresh_token', refresh_token.refresh_token); //(client_id, client_secret, req, res)
-
-app.listen(8888);
-
-console.log('Listening on ' + port);*/
