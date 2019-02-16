@@ -1,9 +1,9 @@
 import request from 'request';
 
-const refresh_token = (client_id, client_secret, req, res) => {
+const refresh_token = (client_id, client_secret, access_token, req, res) => {
     // requesting access token from refresh token
-    let refresh_token = req.query.refresh_token;
-    let authOptions = {
+    const refresh_token = req.query.refresh_token;
+    const authOptions = {
         url: 'https://accounts.spotify.com/api/token',
         headers: { 'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64')) },
         form: {
