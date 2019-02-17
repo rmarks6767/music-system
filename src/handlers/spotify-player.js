@@ -1,4 +1,5 @@
-module.exports = class SpotifyPlayer {
+
+export default class SpotifyPlayer {
     constructor(options = {}) {
         this.options = options;
         this.listeners = {};

@@ -146,9 +146,9 @@ app.get('/refresh_token', function(req, res) {
 console.log('Listening on 8888');
 
 import {play} from './handlers';
-import {player} from './handlers'
+import {Spotify} from './handlers';
 
-const Player = new Spotify.Player({
+const player = new Spotify.SpotifyPlayer({
   name: 'Car Music Player',
   getOAuthToken: callback => {
     // requesting access token from refresh token
@@ -163,6 +163,18 @@ const Player = new Spotify.Player({
       json: true
     };
 
+    
+
+
+
+
+
+
+
+
+
+
+
     request.post(authOptions, function(error, response, body) {
       if (!error && response.statusCode === 200) {
         var access_token = body.access_token;
@@ -173,6 +185,8 @@ const Player = new Spotify.Player({
     });
   }
 });
+
+
 
 app.get('/play', play.play);
 
