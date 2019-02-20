@@ -109,6 +109,7 @@ app.get('/callback', function(req, res) {
             access_token: access_token,
             refresh_token: refresh_token
           }));
+          console.log(refresh_token);
       } else {
         res.redirect('/#' +
           querystring.stringify({
@@ -143,10 +144,8 @@ app.get('/refresh_token', function(req, res) {
   });
 });
 
-console.log('Listening on 8888');
-
 import {play} from './handlers';
-
 app.get('/play', play.play);
 
+console.log('Listening on 8888');
 app.listen(8888);
