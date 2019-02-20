@@ -16,12 +16,12 @@ const play = (req, res, access_token) => {
     //Make a call to spotify with the info to get the audio to play
 
     const response = playme.get('https://api.spotify.com/'
-    + index.access_token
+    + index.refresh_token
     + '/v1/me/player/devices'); 
     console.log(response);
 
     console.log('https://api.spotify.com/'
-    + index.access_token
+    + index.refresh_token
     + '/v1/me/player/devices');
 
     //play the audio
