@@ -15,14 +15,9 @@ const play = (req, res, access_token) => {
     
     //Make a call to spotify with the info to get the audio to play
 
-    const response = playme.get('https://api.spotify.com/'
-    + index.refresh_token
-    + '/v1/me/player/devices'); 
-    console.log(response);
-
-    console.log('https://api.spotify.com/'
-    + index.refresh_token
-    + '/v1/me/player/devices');
+    console.log(playme.get('https://accounts.spotify.com/authorize?client_id='
+    + process.env.CLIENTKEY + '&response_type=code&redirect_uri=' +
+    'http://localhost:8888/callback&scope=user-read-private%20user-read-email&state=34fFs29kd09'));
 
     //play the audio
 

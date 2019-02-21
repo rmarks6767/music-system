@@ -13,9 +13,12 @@ var cors = require('cors');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 
+const dotenv = require('dotenv');
+dotenv.config();
+
 var client_id = process.env.CLIENTKEY; // Your client id
 var client_secret = process.env.SECRETKEY; // Your secret
-var redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri
+var redirect_uri = process.env.URI; // Your redirect uri
 
 /**
  * Generates a random string containing numbers and letters
@@ -145,6 +148,7 @@ app.get('/refresh_token', function(req, res) {
 
 import {play} from './handlers';
 app.get('/play', play.play);
+
 
 console.log('Listening on 8888');
 app.listen(8888);
