@@ -57,7 +57,7 @@ app.get('/login', function(req, res) {
   res.cookie(stateKey, state);
 
   // your application requests authorization
-  var scope = 'user-read-private user-read-email';
+  const scope = 'user-read-playback-state';
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
       response_type: 'code',
@@ -155,7 +155,6 @@ app.get('/refresh_token', function(req, res) {
 });
 
 app.get('/device', function(req, res){
-  
   const options = {
     url: 'https://api.spotify.com/v1/me/player/devices',
     headers: { 
@@ -165,8 +164,13 @@ app.get('/device', function(req, res){
       spotifyInfo.access_token },
     json: true
   };
+
+  request.get(options, function(error, response, body) {
+    console.log(response.statusCode);
+    console.log(body);
+    console.log(error);
+  });
   
-  request.get(options);
 });
 
 
