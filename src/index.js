@@ -21,11 +21,11 @@ dotenv.config();
 const spotifyInfo = {
   client_id : process.env.CLIENTKEY, // Your client id
   client_secret : process.env.SECRETKEY, // Your secret
-  redirect_uri :'http://localhost:8888/callback',
-  code : 'null',
-  access_token : 'null',
-  refresh_token : 'null',
-  device_id : 5,
+  redirect_uri : process.env.REDIRECT, //The callback uri
+  code,
+  access_token,
+  refresh_token,
+  device_id,
 }
 
 /**
@@ -167,7 +167,7 @@ app.get('/device', function(req, res){
 
   request.get(options, function(error, response, body) {
     console.log(response.statusCode);
-    console.log(body);
+    spotifyInfo.device_id = 
     console.log(error);
   });
   
