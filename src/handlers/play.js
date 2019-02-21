@@ -1,5 +1,5 @@
 import Express from 'express';
-import index from '../index.js';
+import index from '../index';
 
 const play = (req, res, access_token) => {
     //take in the user input
@@ -15,11 +15,9 @@ const play = (req, res, access_token) => {
     
     //Make a call to spotify with the info to get the audio to play
 
-    console.log(playme.get('https://accounts.spotify.com/authorize?client_id='
-    + process.env.CLIENTKEY + '&response_type=code&redirect_uri=' +
-    'http://localhost:8888/callback&scope=user-read-private%20user-read-email&state=34fFs29kd09'));
+    console.log(playme.get('g'));
 
-    //play the audio
+    console.log(index.access_token);
 
 
 };
