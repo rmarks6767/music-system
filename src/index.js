@@ -12,6 +12,7 @@ var request = require('request'); // "Request" library
 var cors = require('cors');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
+var player = require('play-sound');
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -24,6 +25,7 @@ const spotifyInfo = {
   code : 'null',
   access_token : 'null',
   refresh_token : 'null',
+  device_id : 5,
 }
 
 /**
@@ -152,29 +154,47 @@ app.get('/refresh_token', function(req, res) {
   });
 });
 
-import {play} from './handlers';
-app.get('/play', function(req, res){
+app.get('/device', function(req, res){
+  
   const options = {
-    url : 'https://accounts.spotify.com/api/token',
-    headers: { 'Authorization': 'Basic ' + (new Buffer(spotifyInfo.client_id + ':' + spotifyInfo.client_secret).toString('base64')) },
-    body : {
-      grant_type : 'authorization_code',
-      code : spotifyInfo.code,
-      redirect_uri : spotifyInfo.redirect_uri,
-    },
-    
-  }
-
-  request.post(options, function(error, response, body) {
-    if (!error && response.statusCode === 200) {
-      spotifyInfo.access_token = body.access_token;
-      res.send({
-        'access_token': spotifyInfo.access_token
-      });
-    }
-  });
+    url: 'https://api.spotify.com/v1/me/player/devices',
+    headers: { 
+      'Accept':'application/json',
+      'Content-Type' : 'application/json',
+      'Authorization': 'Bearer ' + 
+      spotifyInfo.access_token },
+    json: true
+  };
+  
+  request.get(options);
 });
 
 
 console.log('Listening on 8888');
 app.listen(8888);
+
+// const play = ({
+//   spotify_uri,
+//   playerInstance: {
+//     _options: {
+//       getOAuthToken,
+//       id
+//     }
+//   }
+// }) => {
+//   getOAuthToken(access_token => {
+//     fetch(`https://api.spotify.com/v1/me/player/play?device_id=${id}`, {
+//       method: 'PUT',
+//       body: JSON.stringify({ uris: [spotify_uri] }),
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${access_token}`
+//       },
+//     });
+//   });
+// };
+
+// play({
+//   playerInstance: new Spotify.Player({ name: "..." }),
+//   spotify_uri: 'spotify:track:7xGfFoTpQ2E7fRF5lN10tr',
+// });
