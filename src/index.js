@@ -22,10 +22,10 @@ const spotifyInfo = {
   client_id : process.env.CLIENTKEY, // Your client id
   client_secret : process.env.SECRETKEY, // Your secret
   redirect_uri : process.env.REDIRECT, //The callback uri
-  code,
-  access_token,
-  refresh_token,
-  device_id,
+  code : 'null',
+  access_token : 'null',
+  refresh_token : 'null',
+  device_id : 5,
 }
 
 /**
@@ -167,6 +167,7 @@ app.get('/device', function(req, res){
 
   request.get(options, function(error, response, body) {
     console.log(response.statusCode);
+    console.log(body);
     spotifyInfo.device_id = 
     console.log(error);
   });
