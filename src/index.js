@@ -165,11 +165,21 @@ app.get('/device', function(req, res){
     } else {
       console.log('It was empty, no active devices!');
     }
-    
   });
-
 });
 
+app.get('/playsong', function(req, res, body){
+
+
+});
+app.get('/playartist', function(req, res, body){
+
+
+});
+app.get('/volume', function(req, res, body){
+
+
+});
 
 console.log('Listening on 8888');
 app.listen(8888);
