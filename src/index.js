@@ -14,8 +14,8 @@ var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 var player = require('play-sound');
 
-const dotenv = require('dotenv');
-dotenv.config();
+// const dotenv = require('dotenv');
+// dotenv.config();
 
 //Store all the important info in a struct to be access by the rest of the program
 const spotifyInfo = {
@@ -166,13 +166,17 @@ app.get('/device', function(req, res){
   };
 
   request.get(options, function(error, response, body) {
+    const first = body.devices[0]
+
     console.log(response.statusCode);
     console.log(body);
-    spotifyInfo.device_id = 
+    console.log(first.id);
     console.log(error);
   });
   
 });
+
+//create a player and then be able to control it from the requests
 
 
 console.log('Listening on 8888');
