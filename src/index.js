@@ -1,10 +1,18 @@
+/**
+ * This is an example of a basic node.js script that performs
+ * the Authorization Code oAuth2 flow to authenticate against
+ * the Spotify Accounts.
+ *
+ * For more information, read
+ * https://developer.spotify.com/web-api/authorization-guide/#authorization_code_flow
+ */
+
 var express = require('express'); // Express web server framework
 var request = require('request'); // "Request" library
 var cors = require('cors');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 var player = require('play-sound');
-import {makestring} from './handlers';
 
 //Store all the important info in a struct to be access by the rest of the program
 const spotifyInfo = {
@@ -14,8 +22,24 @@ const spotifyInfo = {
   code : 'null',
   access_token : 'null',
   refresh_token : 'null',
-  device_id : 5,
+  device : [],
+  scope : 'user-read-playback-state',
 }
+
+/**
+ * Generates a random string containing numbers and letters
+ * @param  {number} length The length of the string
+ * @return {string} The generated string
+ */
+var generateRandomString = function(length) {
+  var text = '';
+  var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (var i = 0; i < length; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+};
 
 var stateKey = 'spotify_auth_state';
 
@@ -25,18 +49,17 @@ app.use(express.static(__dirname + '/public'))
    .use(cors())
    .use(cookieParser());
 
-app.get('/login', function(req, res) {
+app.get('/', function(req, res) {
 
-  var state = makestring(16);
+  var state = generateRandomString(16);
   res.cookie(stateKey, state);
 
   // your application requests authorization
-  const scope = 'user-read-playback-state';
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
       response_type: 'code',
       client_id: spotifyInfo.client_id,
-      scope: scope,
+      scope: spotifyInfo.scope,
       redirect_uri: spotifyInfo.redirect_uri,
       state: state
     }));
@@ -89,11 +112,7 @@ app.get('/callback', function(req, res) {
         });
 
         // we can also pass the token to the browser to make requests from there
-        res.redirect('/#' +
-          querystring.stringify({
-            access_token: spotifyInfo.access_token,
-            refresh_token: spotifyInfo.refresh_token
-          }));
+        res.redirect('/device');
       } else {
         res.redirect('/#' +
           querystring.stringify({
@@ -129,6 +148,7 @@ app.get('/refresh_token', function(req, res) {
 });
 
 app.get('/device', function(req, res){
+  //get the device id that just opened that site
   const options = {
     url: 'https://api.spotify.com/v1/me/player/devices',
     headers: { 
@@ -140,44 +160,16 @@ app.get('/device', function(req, res){
   };
 
   request.get(options, function(error, response, body) {
-    const first = body.devices[0]
-
-    console.log(response.statusCode);
-    console.log(body);
-    console.log(first.id);
-    console.log(error);
+    if (body.devices != null){
+      spotifyInfo.device = body.devices[0]
+    } else {
+      console.log('It was empty, no active devices!');
+    }
+    
   });
-  
-});
 
-//create a player and then be able to control it from the requests
+});
 
 
 console.log('Listening on 8888');
 app.listen(8888);
-
-// const play = ({
-//   spotify_uri,
-//   playerInstance: {
-//     _options: {
-//       getOAuthToken,
-//       id
-//     }
-//   }
-// }) => {
-//   getOAuthToken(access_token => {
-//     fetch(`https://api.spotify.com/v1/me/player/play?device_id=${id}`, {
-//       method: 'PUT',
-//       body: JSON.stringify({ uris: [spotify_uri] }),
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Authorization': `Bearer ${access_token}`
-//       },
-//     });
-//   });
-// };
-
-// play({
-//   playerInstance: new Spotify.Player({ name: "..." }),
-//   spotify_uri: 'spotify:track:7xGfFoTpQ2E7fRF5lN10tr',
-// });
