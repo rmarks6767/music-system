@@ -13,6 +13,18 @@ var cors = require('cors');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 var player = require('play-sound');
+var path = require('path');
+var fs = require('fs');
+
+var app = express();
+const router = express.Router();
+
+app.get('/home', function(req,res){
+  var token = spotifyInfo.access_token;
+  res.sendFile(__dirname + '/index.html');
+});
+
+
 
 //Store all the important info in a struct to be access by the rest of the program
 const spotifyInfo = {
@@ -43,7 +55,7 @@ var generateRandomString = function(length) {
 
 var stateKey = 'spotify_auth_state';
 
-var app = express();
+
 
 app.use(express.static(__dirname + '/public'))
    .use(cors())
@@ -160,8 +172,12 @@ app.get('/device', function(req, res){
   };
 
   request.get(options, function(error, response, body) {
-    if (body.devices != null){
+    if (body.devices[0] != null){
       spotifyInfo.device = body.devices[0]
+      console.log(body)
+      console.log(spotifyInfo.device);
+      console.log(spotifyInfo.device.id);
+      res.redirect('/home?token=' + spotifyInfo.access_token + '&id=' + spotifyInfo.device.id);
     } else {
       console.log('It was empty, no active devices!');
     }
@@ -173,8 +189,29 @@ app.get('/playsong', function(req, res, body){
 
 });
 app.get('/playartist', function(req, res, body){
+  if (body != null){
+    const artist = 'Post Malone'
+  
+    const options = { 
+      url: 'https://api.spotify.com/v1/search?q=' + 'gg%20gg' 
+      + '&type=artist',
+      headers: { 
+        'Accept':'application/json',
+        'Content-Type' : 'application/json',
+        'Authorization': 'Bearer ' + 
+        spotifyInfo.access_token },
+      json: true
+    };
 
-
+    request.get(options, function(error, response, body) {
+      if (body != null){
+        console.log(body)
+      } else {
+        console.log('Artist not found!');
+        return 400;
+      }
+    });
+  }
 });
 app.get('/volume', function(req, res, body){
 
