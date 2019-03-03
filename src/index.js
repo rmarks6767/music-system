@@ -124,7 +124,8 @@ app.get('/callback', function(req, res) {
         });
 
         // we can also pass the token to the browser to make requests from there
-        res.redirect('/device');
+        res.redirect('/home?token=' + spotifyInfo.access_token);
+        //res.redirect('/device');
       } else {
         res.redirect('/#' +
           querystring.stringify({
@@ -177,7 +178,7 @@ app.get('/device', function(req, res){
       console.log(body)
       console.log(spotifyInfo.device);
       console.log(spotifyInfo.device.id);
-      res.redirect('/home?token=' + spotifyInfo.access_token + '&id=' + spotifyInfo.device.id);
+       //+ '&id=' + spotifyInfo.device.id);
     } else {
       console.log('It was empty, no active devices!');
     }
