@@ -36,6 +36,7 @@ const spotifyInfo = {
   refresh_token : 'null',
   device : [],
   scope : 'user-read-playback-state',
+  track : 'null',
 }
 
 /**
@@ -124,8 +125,27 @@ app.get('/callback', function(req, res) {
         });
 
         // we can also pass the token to the browser to make requests from there
-        res.redirect('/home?token=' + spotifyInfo.access_token);
-        //res.redirect('/device');
+          //get the device id that just opened that site
+          const options = {
+            url: 'https://api.spotify.com/v1/me/player/devices',
+            headers: { 
+              'Accept':'application/json',
+              'Content-Type' : 'application/json',
+              'Authorization': 'Bearer ' + 
+              spotifyInfo.access_token },
+            json: true
+          };
+             request.get(options, function(error, response, body) {
+            if (body.devices[0] != null){
+              spotifyInfo.device = body.devices[0]
+              console.log(body)
+              console.log(spotifyInfo.device);
+              console.log(spotifyInfo.device.id);
+            } else {
+              console.log('It was empty, no active devices!');
+            }
+          });
+        
       } else {
         res.redirect('/#' +
           querystring.stringify({
@@ -160,41 +180,16 @@ app.get('/refresh_token', function(req, res) {
   });
 });
 
-app.get('/device', function(req, res){
-  //get the device id that just opened that site
-  const options = {
-    url: 'https://api.spotify.com/v1/me/player/devices',
-    headers: { 
-      'Accept':'application/json',
-      'Content-Type' : 'application/json',
-      'Authorization': 'Bearer ' + 
-      spotifyInfo.access_token },
-    json: true
-  };
-
-  request.get(options, function(error, response, body) {
-    if (body.devices[0] != null){
-      spotifyInfo.device = body.devices[0]
-      console.log(body)
-      console.log(spotifyInfo.device);
-      console.log(spotifyInfo.device.id);
-       //+ '&id=' + spotifyInfo.device.id);
-    } else {
-      console.log('It was empty, no active devices!');
-    }
-  });
-});
-
 app.get('/playsong', function(req, res, body){
 
 
 });
 app.get('/playartist', function(req, res, body){
   if (body != null){
-    const artist = 'Post Malone'
+    const artist = 'Post Malone';
   
     const options = { 
-      url: 'https://api.spotify.com/v1/search?q=' + 'gg%20gg' 
+      url: 'https://api.spotify.com/v1/search?q=' + artist 
       + '&type=artist',
       headers: { 
         'Accept':'application/json',
@@ -206,7 +201,9 @@ app.get('/playartist', function(req, res, body){
 
     request.get(options, function(error, response, body) {
       if (body != null){
-        console.log(body)
+        console.log(body.items)
+        const track = body;
+        res.redirect('/home?token=' + spotifyInfo.access_token + '&id=' + spotifyInfo.device.id + '&track=' + track);
       } else {
         console.log('Artist not found!');
         return 400;
