@@ -37,6 +37,7 @@ const spotifyInfo = {
   device : [],
   scope : 'user-read-playback-state',
   track : 'null',
+  volume : 100,
 }
 
 /**
@@ -136,14 +137,10 @@ app.get('/callback', function(req, res) {
             json: true
           };
              request.get(options, function(error, response, body) {
-            if (body.devices[0] != null){
-              spotifyInfo.device = body.devices[0]
-              console.log(body)
-              console.log(spotifyInfo.device);
-              console.log(spotifyInfo.device.id);
-            } else {
-              console.log('It was empty, no active devices!');
-            }
+              //spotifyInfo.device = body.devices[0]
+              //console.log(spotifyInfo.device.id);
+              //console.log(body)
+              //console.log(spotifyInfo.device);
           });
         
       } else {
@@ -180,12 +177,75 @@ app.get('/refresh_token', function(req, res) {
   });
 });
 
-app.get('/playsong', function(req, res, body){
+app.get('/pause', function(req, res, body){
+  //get a new auth token only if it needs to 
+  if (spotifyInfo.scope != 'user-modify-playback-state')
+  {
+    spotifyInfo.scope = 'user-modify-playback-state';
+    res.redirect('/');
+  }
+  const options = { 
+    url: 'https://api.spotify.com/v1/me/player/pause',
+    headers: { 
+      'Accept':'application/json',
+      'Content-Type' : 'application/json',
+      'Authorization': 'Bearer ' + 
+      spotifyInfo.access_token },
+    json: true
+  };
 
-
+  request.put(options, function(error, response, body) {
+    console.log('We paused dawg');
+  });
 });
+
+app.get('/resume', function(req, res, body){
+  //get a new auth token only if it needs to 
+  if (spotifyInfo.scope != 'user-modify-playback-state')
+  {
+    spotifyInfo.scope = 'user-modify-playback-state';
+    res.redirect('/');
+  }
+  const options = { 
+    url: 'https://api.spotify.com/v1/me/player/play',
+    headers: { 
+      'Accept':'application/json',
+      'Content-Type' : 'application/json',
+      'Authorization': 'Bearer ' + 
+      spotifyInfo.access_token },
+    json: true
+  };
+
+  request.put(options, function(error, response, body) {
+    console.log('Resumed');
+  });
+});
+
+app.get('/volume', function(req, res, body){
+ //get a new auth token only if it needs to 
+ if (spotifyInfo.scope != 'user-modify-playback-state')
+ {
+   spotifyInfo.scope = 'user-modify-playback-state';
+   res.redirect('/');
+ }
+ const volumechange = res.query.volume;
+  const options = { 
+    url: 'https://api.spotify.com/v1/me/player/volume?volume_percent=' + volumechange,
+    headers: { 
+      'Accept':'application/json',
+      'Content-Type' : 'application/json',
+      'Authorization': 'Bearer ' + 
+      spotifyInfo.access_token },
+    json: true
+  };
+
+  request.put(options, function(error, response, body) {
+    console.log('Changed the Volume to' + volumechange);
+  });
+});
+
 app.get('/playartist', function(req, res, body){
-  if (body != null){
+  //if (body != null){
     const artist = 'Post Malone';
   
     const options = { 
@@ -209,10 +269,6 @@ app.get('/playartist', function(req, res, body){
         return 400;
       }
     });
-  }
-});
-app.get('/volume', function(req, res, body){
-
 
 });
 
