@@ -253,13 +253,18 @@ app.get('/volume', function(req, res, body){
   });
 });
 
-app.get('/playartist', function(req, res, body){
-  //if (body != null){
-    const artist = 'Post Malone';
+app.get('/play', function(req, res, body){
+  if (spotifyInfo.scope != 'user-modify-playback-state')
+  {
+    spotifyInfo.scope = 'user-modify-playback-state';
+    res.redirect('/');
+  }
+  const playme = req.query.q;
+  const type = req.query.type;
   
     const options = { 
-      url: 'https://api.spotify.com/v1/search?q=' + artist 
-      + '&type=artist',
+      url: 'https://api.spotify.com/v1/search?q=' + playme 
+      + '&type=' + type,
       headers: { 
         'Accept':'application/json',
         'Content-Type' : 'application/json',
@@ -267,17 +272,41 @@ app.get('/playartist', function(req, res, body){
         spotifyInfo.access_token },
       json: true
     };
-
+    var uri = '';
+    var position = 0;
     request.get(options, function(error, response, body) {
-      if (body != null){
-        console.log(body.items)
-        const track = body;
-        res.redirect('/home?token=' + spotifyInfo.access_token + '&id=' + spotifyInfo.device.id + '&track=' + track);
-      } else {
-        console.log('Artist not found!');
-        return 400;
+      for (var i = 0; i < body.tracks.items.length; i++){
+          if (body.tracks.items[i].name.toLowerCase() == playme){
+            console.log(body.tracks.items[i].name.toLowerCase())
+            uri = body.tracks.items[i].uri;
+            position = body.tracks.items[i].track_number;
+            console.log(uri);
+            console.log(position);
+            const boptions = {
+              url: 'https://api.spotify.com/v1/me/player/play',
+              body: {
+                "uris": [uri],
+                  //'position_ms': 0
+              },
+              headers: { 
+                'Accept':'application/json',
+                'Content-Type' : 'application/json',
+                'Authorization': 'Bearer ' + 
+                spotifyInfo.access_token },
+              json: true
+            };
+        
+            request.put(boptions, function(error, response, body){
+              console.log(body);
+              console.log('Help me');
+            });
+            break;
+          }
       }
+
     });
+
+    
 
 });
 
