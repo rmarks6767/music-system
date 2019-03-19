@@ -35,9 +35,10 @@ const spotifyInfo = {
   access_token : 'null',
   refresh_token : 'null',
   device : [],
-  scope : 'user-read-playback-state',
+  scope : 'user-modify-playback-state',
   track : 'null',
   volume : 100,
+  queue : [],
 }
 
 /**
@@ -254,14 +255,18 @@ app.get('/volume', function(req, res, body){
 });
 
 app.get('/play', function(req, res, body){
+  //Make sure the state is correct for the auth token
   if (spotifyInfo.scope != 'user-modify-playback-state')
   {
     spotifyInfo.scope = 'user-modify-playback-state';
     res.redirect('/');
   }
+  
+  //Assign the constants based on the query data
   const playme = req.query.q;
   const type = req.query.type;
   
+  //Request data to be sent to spotify, returning a json of the track ids and stuff
     const options = { 
       url: 'https://api.spotify.com/v1/search?q=' + playme 
       + '&type=' + type,
@@ -272,21 +277,43 @@ app.get('/play', function(req, res, body){
         spotifyInfo.access_token },
       json: true
     };
-    var uri = '';
-    var position = 0;
+
+    //Make the request to spotify to recieve data
     request.get(options, function(error, response, body) {
-      for (var i = 0; i < body.tracks.items.length; i++){
-          if (body.tracks.items[i].name.toLowerCase() == playme){
-            console.log(body.tracks.items[i].name.toLowerCase())
-            uri = body.tracks.items[i].uri;
-            position = body.tracks.items[i].track_number;
-            console.log(uri);
-            console.log(position);
-            const boptions = {
+
+      var itemToCheck = '';
+
+      //Check the type in order to accurately check the response stuff
+      if (type == 'track'){
+        itemToCheck = body.tracks.items;
+      } else if (type == 'artist'){
+        itemToCheck = body.artists.items;
+      }
+
+      //loop through all the items of the item list to find the track to play
+      for (var i = 0; i < itemToCheck.length; i++){
+          
+        //Check to see if any of the items in the list have that name
+        if (itemToCheck[i].name.toLowerCase() == playme){
+
+          console.log('Found the song with name ' + itemToCheck[i].name );
+          console.log('and the uri of ' + itemToCheck[i].uri);
+          var stuff = [];
+
+          //Adds the new song to the queue that is stored locally
+          if (type == 'track'){
+            stuff.push(itemToCheck[i].uri);
+          } else if (type == 'artist'){
+            stuff = itemToCheck[i].uri;
+          }
+
+          var boptions = {};
+
+          if (type == 'track'){
+            boptions = {
               url: 'https://api.spotify.com/v1/me/player/play',
               body: {
-                "uris": [uri],
-                  //'position_ms': 0
+                "uris" : stuff,
               },
               headers: { 
                 'Accept':'application/json',
@@ -295,13 +322,30 @@ app.get('/play', function(req, res, body){
                 spotifyInfo.access_token },
               json: true
             };
-        
-            request.put(boptions, function(error, response, body){
-              console.log(body);
-              console.log('Help me');
-            });
-            break;
+          } else if(type == 'artist') {
+            boptions = {
+              url: 'https://api.spotify.com/v1/me/player/play',
+              body: {
+                "context_uri" : stuff,
+              },
+              headers: { 
+                'Accept':'application/json',
+                'Content-Type' : 'application/json',
+                'Authorization': 'Bearer ' + 
+                spotifyInfo.access_token },
+              json: true
+            };
           }
+          
+      
+          request.put(boptions, function(error, response, body){
+
+            console.log(body);
+          });
+          break;
+        } else {
+          console.log('song not found');
+        }
       }
 
     });
