@@ -228,9 +228,18 @@ app.get('/volume', function(req, res, body){
    spotifyInfo.scope = 'user-modify-playback-state';
    res.redirect('/');
  }
- const volumechange = res.query.volume;
+ //Make sure the volume isn't above 100
+  if (Number(req.query.volume) > 100){
+    spotifyInfo.volume = 100;
+  }else if (0 > Number(req.query.volume)){
+    spotifyInfo.volume = 0;
+  } else {
+    spotifyInfo.volume = Number(req.query.volume);
+  }
+ 
+ 
   const options = { 
-    url: 'https://api.spotify.com/v1/me/player/volume?volume_percent=' + volumechange,
+    url: 'https://api.spotify.com/v1/me/player/volume?volume_percent=' + spotifyInfo.volume,
     headers: { 
       'Accept':'application/json',
       'Content-Type' : 'application/json',
@@ -240,7 +249,7 @@ app.get('/volume', function(req, res, body){
   };
 
   request.put(options, function(error, response, body) {
-    console.log('Changed the Volume to' + volumechange);
+    console.log('Changed the Volume to ' + spotifyInfo.volume);
   });
 });
 
