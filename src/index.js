@@ -269,7 +269,7 @@ app.get('/play', function(req, res, body){
   //Request data to be sent to spotify, returning a json of the track ids and stuff
     const options = { 
       url: 'https://api.spotify.com/v1/search?q=' + playme 
-      + '&type=' + type,
+      + '&type=track',
       headers: { 
         'Accept':'application/json',
         'Content-Type' : 'application/json',
@@ -304,7 +304,13 @@ app.get('/play', function(req, res, body){
           if (type == 'track'){
             stuff.push(itemToCheck[i].uri);
           } else if (type == 'artist'){
-            stuff = itemToCheck[i].uri;
+            for (var g = 0; g < itemToCheck.length; g++){
+              if (itemToCheck[g].uri.search('album') != null){
+                stuff = itemToCheck[g].uri;
+                console.log(stuff);
+                break;
+              }
+            }
           }
 
           var boptions = {};
@@ -327,6 +333,9 @@ app.get('/play', function(req, res, body){
               url: 'https://api.spotify.com/v1/me/player/play',
               body: {
                 "context_uri" : stuff,
+                "offset" : {
+                  "position" : 0
+                },
               },
               headers: { 
                 'Accept':'application/json',
