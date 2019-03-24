@@ -262,14 +262,28 @@ app.get('/play', function(req, res, body){
     res.redirect('/');
   }
   
-  //Assign the constants based on the query data
+  //Assign the constants based on the query data and if nothing is found it will play all star lol
   const playme = req.query.q;
   const type = req.query.type;
-  
+  var requestUrl = 'https://api.spotify.com/v1/search?q="all%20star"&type=track';
+
+  console.log(playme + ' ' + type)
+
+
+  if(type == 'album'){
+    requestUrl = 'https://api.spotify.com/v1/search?q="' + playme 
+    + '"&type=album';
+  } else if (type == 'track'){
+    requestUrl = 'https://api.spotify.com/v1/search?q="' + playme 
+    + '"&type=track';
+  } else if (type == 'artist'){
+    requestUrl = 'https://api.spotify.com/v1/search?q=artist:"' + playme 
+    + '"&type=album';
+  }
+
   //Request data to be sent to spotify, returning a json of the track ids and stuff
     const options = { 
-      url: 'https://api.spotify.com/v1/search?q=' + playme 
-      + '&type=track',
+      url: requestUrl,
       headers: { 
         'Accept':'application/json',
         'Content-Type' : 'application/json',
@@ -286,56 +300,53 @@ app.get('/play', function(req, res, body){
       //Check the type in order to accurately check the response stuff
       if (type == 'track'){
         itemToCheck = body.tracks.items;
-      } else if (type == 'artist'){
-        itemToCheck = body.artists.items;
-      }
 
-      //loop through all the items of the item list to find the track to play
-      for (var i = 0; i < itemToCheck.length; i++){
-          
-        //Check to see if any of the items in the list have that name
-        if (itemToCheck[i].name.toLowerCase() == playme){
+          //loop through all the items of the item list to find the track to play
+        for (var i = 0; i < itemToCheck.length; i++){
+          //Check to see if any of the items in the list have that name
+          if (itemToCheck[i].name.toLowerCase() == playme || type == 'artist'){
 
-          console.log('Found the song with name ' + itemToCheck[i].name );
-          console.log('and the uri of ' + itemToCheck[i].uri);
-          var stuff = [];
+            console.log('Found the ' + type + ' with name ' + itemToCheck[i].name );
+            console.log('and the uri of ' + itemToCheck[i].uri);
+            var stuff = [];
 
-          //Adds the new song to the queue that is stored locally
-          if (type == 'track'){
-            stuff.push(itemToCheck[i].uri);
-          } else if (type == 'artist'){
-            for (var g = 0; g < itemToCheck.length; g++){
-              if (itemToCheck[g].uri.search('album') != null){
-                stuff = itemToCheck[g].uri;
-                console.log(stuff);
-                break;
-              }
+            //Adds the new song to the queue that is stored locally
+            if (type == 'track'){
+              stuff.push(itemToCheck[i].uri);
+            } else if (type == 'artist'){
+                  stuff = itemToCheck[i].uri;
             }
-          }
 
-          var boptions = {};
+            console.log(stuff);
 
-          if (type == 'track'){
-            boptions = {
-              url: 'https://api.spotify.com/v1/me/player/play',
-              body: {
-                "uris" : stuff,
-              },
-              headers: { 
-                'Accept':'application/json',
-                'Content-Type' : 'application/json',
-                'Authorization': 'Bearer ' + 
-                spotifyInfo.access_token },
-              json: true
-            };
-          } else if(type == 'artist') {
-            boptions = {
-              url: 'https://api.spotify.com/v1/me/player/play',
-              body: {
-                "context_uri" : stuff,
-                "offset" : {
-                  "position" : 0
+            var boptions = {};
+
+            if (type == 'track'){
+              boptions = {
+                url: 'https://api.spotify.com/v1/me/player/play',
+                body: {
+                  "uris" : stuff,
                 },
+                headers: { 
+                  'Accept':'application/json',
+                  'Content-Type' : 'application/json',
+                  'Authorization': 'Bearer ' + 
+                  spotifyInfo.access_token },
+                json: true
+              };
+            } 
+      } else if (type == 'artist' || type == 'album'){
+        itemToCheck = body.albums.items;
+      }
+      else if(type == 'artist') {
+            boptions = {
+              url: 'https://api.spotify.com/v1/me/player/play',
+              body: {
+                "context_uri": stuff,
+                "offset": {
+                  "position": Math.random(0, )
+                },
+                "position_ms": 0
               },
               headers: { 
                 'Accept':'application/json',
