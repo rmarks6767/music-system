@@ -291,6 +291,34 @@ app.get('/play', function(req, res, body){
 
       //Make the request to spotify to recieve data
       request.get(options, function(error, response, body) {
+        const position = Math.floor(Math.random() * body.albums.items.length);
+        const randSong = Math.floor(Math.random() * body.albums.items[position].total_tracks);
+        const songUri = body.albums.items[position].uri;
+
+        const boptions = {
+          url: 'https://api.spotify.com/v1/me/player/play',
+          body: {
+          "context_uri": songUri,
+          "offset": {
+          "position": randSong
+          },
+          "position_ms": 0
+          },
+          headers: {
+          'Accept':'application/json',
+          'Content-Type' : 'application/json',
+          'Authorization': 'Bearer ' +
+          spotifyInfo.access_token },
+          json: true
+          };
+          
+          
+          
+          
+          request.put(boptions, function(error, response, body){
+            console.log(response);
+          });
+
 
       });
 
@@ -319,7 +347,6 @@ app.get('/play', function(req, res, body){
             console.log('and the uri of ' + body.tracks.items[i].uri);
 
             spotifyInfo.queue.push(body.tracks.items[i].uri)
-
             boptions = {
               url: 'https://api.spotify.com/v1/me/player/play',
               body: {
@@ -332,11 +359,12 @@ app.get('/play', function(req, res, body){
               spotifyInfo.access_token },
               json: true
               };
-
             request.put(boptions, function(error, response, body){
               console.log(body);
-              break;
+              
             });
+            spotifyInfo.queue.pop()
+            break;
           }
         }
       });
