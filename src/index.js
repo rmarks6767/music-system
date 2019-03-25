@@ -58,8 +58,6 @@ var generateRandomString = function(length) {
 
 var stateKey = 'spotify_auth_state';
 
-
-
 app.use(express.static(__dirname + '/public'))
    .use(cors())
    .use(cookieParser());
@@ -238,7 +236,6 @@ app.get('/volume', function(req, res, body){
     spotifyInfo.volume = Number(req.query.volume);
   }
  
- 
   const options = { 
     url: 'https://api.spotify.com/v1/me/player/volume?volume_percent=' + spotifyInfo.volume,
     headers: { 
@@ -254,6 +251,9 @@ app.get('/volume', function(req, res, body){
   });
 });
 
+//Things to add:
+// *** Should add specification for what artist or album x song / album has should be like &extra=artist:jon%20bellion
+// *** Add checking to see if a song/album is explicit and if it is, don't play, return song/album is explicit
 app.get('/play', function(req, res, body){
   //Make sure the state is correct for the auth token
   if (spotifyInfo.scope != 'user-modify-playback-state')
@@ -312,14 +312,9 @@ app.get('/play', function(req, res, body){
           json: true
           };
           
-          
-          
-          
           request.put(boptions, function(error, response, body){
             console.log(response);
           });
-
-
       });
 
   } else if (type == 'track') {
@@ -375,5 +370,16 @@ app.get('/play', function(req, res, body){
 
 });
 
+app.get('/seek', function(req, res, body){
+  //if the user wants to go to the next song
+  if (req.query.forward){
+    
+    //if the user wants to go to the previous song
+  } else if (!req.query.forward) { 
+
+  } else {
+    console.log('incorrect user input!');
+  }
+});
 console.log('Listening on 8888');
 app.listen(8888);
