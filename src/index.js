@@ -371,15 +371,43 @@ app.get('/play', function(req, res, body){
 });
 
 app.get('/seek', function(req, res, body){
+  if (spotifyInfo.scope != 'user-modify-playback-state')
+  {
+    spotifyInfo.scope = 'user-modify-playback-state';
+    res.redirect('/');
+  }
+
+  var seekUrl = 'do nothing and will not do anything to the current playback'
+
   //if the user wants to go to the next song
   if (req.query.forward){
-    
+    seekUrl = 'https://api.spotify.com/v1/me/player/next';
     //if the user wants to go to the previous song
   } else if (!req.query.forward) { 
-
+    seekUrl = 'https://api.spotify.com/v1/me/player/previous';
   } else {
     console.log('incorrect user input!');
   }
+
+  const options = { 
+    url: seekUrl,
+    headers: { 
+      'Accept':'application/json',
+      'Content-Type' : 'application/json',
+      'Authorization': 'Bearer ' + 
+      spotifyInfo.access_token },
+    json: true
+  };
+
+  request.post(options, function(error, response, body) {
+    if (req.query.forward){
+      console.log('Went to the next song');
+    } else if(!req.query.forward){
+      console.log('Went to the previous song');
+    } else {
+      console.log('We don wrong!!');
+    }
+  });
 });
 console.log('Listening on 8888');
 app.listen(8888);
