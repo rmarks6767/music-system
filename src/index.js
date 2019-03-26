@@ -254,6 +254,7 @@ app.get('/volume', function(req, res, body){
 //Things to add:
 // *** Should add specification for what artist or album x song / album has should be like &extra=artist:jon%20bellion
 // *** Add checking to see if a song/album is explicit and if it is, don't play, return song/album is explicit
+// *** Add working queue and checking to see what is currently playing
 app.get('/play', function(req, res, body){
   //Make sure the state is correct for the auth token
   if (spotifyInfo.scope != 'user-modify-playback-state')
@@ -268,7 +269,7 @@ app.get('/play', function(req, res, body){
   var requestUrl = 'https://api.spotify.com/v1/search?q="all%20star"&type=track';
 
   console.log(playme + ' ' + type);
-
+  
   //The way of getting either of these is different and needs to be randomized among the different stuff
   if (type == 'artist' || type == 'album') {
     if(type == 'album'){
@@ -278,6 +279,8 @@ app.get('/play', function(req, res, body){
       requestUrl = 'https://api.spotify.com/v1/search?q=artist:"' + playme
       + '"&type=album';
     }
+    
+    
     //Request data to be sent to spotify, returning a json of the track ids and stuff
     const options = {
       url: requestUrl,
@@ -285,7 +288,7 @@ app.get('/play', function(req, res, body){
       'Accept':'application/json',
       'Content-Type' : 'application/json',
       'Authorization': 'Bearer ' +
-      spotifyInfo.access_token },
+      currentToken},
       json: true
       };
 
@@ -308,7 +311,7 @@ app.get('/play', function(req, res, body){
           'Accept':'application/json',
           'Content-Type' : 'application/json',
           'Authorization': 'Bearer ' +
-          spotifyInfo.access_token },
+          currentToken},
           json: true
           };
           
@@ -326,7 +329,7 @@ app.get('/play', function(req, res, body){
       'Accept':'application/json',
       'Content-Type' : 'application/json',
       'Authorization': 'Bearer ' +
-      spotifyInfo.access_token },
+      currentToken },
       json: true
       };
 
@@ -341,7 +344,18 @@ app.get('/play', function(req, res, body){
             console.log('Found the ' + type + ' with name ' + body.tracks.items[i].name );
             console.log('and the uri of ' + body.tracks.items[i].uri);
 
-            spotifyInfo.queue.push(body.tracks.items[i].uri)
+            //Get the current playback info to see what adjustments to the queue we have to make
+              //Make sure the state is correct for the auth token
+              var playbackInfo = {};
+              playbackInfo = GetCurrentPlayback();
+            console.log(playbackInfo);
+            if (spotifyInfo.queue != null){
+              while (spotifyInfo.queue[0] != playbackInfo.currentUri)
+              {
+                spotifyInfo.queue.shift()
+              }
+            }
+            spotifyInfo.queue.push(body.tracks.items[i].uri);
             boptions = {
               url: 'https://api.spotify.com/v1/me/player/play',
               body: {
@@ -351,14 +365,24 @@ app.get('/play', function(req, res, body){
               'Accept':'application/json',
               'Content-Type' : 'application/json',
               'Authorization': 'Bearer ' +
-              spotifyInfo.access_token },
+              currentToken},
               json: true
               };
             request.put(boptions, function(error, response, body){
-              console.log(body);
+              const roptions = {
+                url: 'https://api.spotify.com/v1/me/player/seek?position_ms=' + playbackInfo.currentMS,
+                headers: {
+                'Accept':'application/json',
+                'Content-Type' : 'application/json',
+                'Authorization': 'Bearer ' +
+                currentToken },
+                json: true
+              };
               
+              request.put(roptions, function(error, response, body) {
+                console.log('Seeking to current place in song');
+              });
             });
-            spotifyInfo.queue.pop()
             break;
           }
         }
@@ -411,3 +435,26 @@ app.get('/seek', function(req, res, body){
 });
 console.log('Listening on 8888');
 app.listen(8888);
+
+//Responsible for getting the current info about the playback and sending it back to be played
+function GetCurrentPlayback(){
+  const options = {
+      url: 'https://api.spotify.com/v1/me/player/currently-playing',
+      headers: {
+      'Accept':'application/json',
+      'Content-Type' : 'application/json',
+      'Authorization': 'Bearer ' +
+      spotifyInfo.access_token },
+      json: true
+      };
+  var currentlyPlayingInfo = {};
+  request.get(options, function(error, response, body){
+    currentlyPlayingInfo = {
+      currentMS : Number(body.progress_ms),
+      currentUri : String(body.uri),
+    }
+    console.log('current ms: ' + currentlyPlayingInfo.currentMS);
+    console.log(body);
+  });
+  return currentlyPlayingInfo;
+}
