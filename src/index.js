@@ -15,6 +15,7 @@ var cookieParser = require('cookie-parser');
 var player = require('play-sound');
 var path = require('path');
 var fs = require('fs');
+var time = require('moment');
 
 var app = express();
 const router = express.Router();
@@ -23,8 +24,6 @@ app.get('/home', function(req,res){
   var token = spotifyInfo.access_token;
   res.sendFile(__dirname + '/index.html');
 });
-
-
 
 //Store all the important info in a struct to be access by the rest of the program
 const spotifyInfo = {
@@ -39,11 +38,6 @@ const spotifyInfo = {
   track : 'null',
   volume : 100,
   queue : [],
-}
-
-const playbackInfo = {
-  currentMS : 0,
-  currentUri : null,
 }
 
 /**
@@ -83,6 +77,7 @@ app.get('/', function(req, res) {
     }));
 });
 
+//
 app.get('/callback', function(req, res) {
 
   // your application requests refresh and access tokens
@@ -157,6 +152,7 @@ app.get('/callback', function(req, res) {
   }
 });
 
+//Refreshes the token that is required
 app.get('/refresh_token', function(req, res) {
 
   // requesting access token from refresh token
@@ -181,6 +177,7 @@ app.get('/refresh_token', function(req, res) {
   });
 });
 
+//Pauses the currently playing song
 app.get('/pause', function(req, res, body){
   //get a new auth token only if it needs to 
   if (spotifyInfo.scope != 'user-modify-playback-state')
@@ -226,93 +223,44 @@ app.get('/resume', function(req, res, body){
   });
 });
 
-//Pauses the current song of the player
-app.get('/volume', function(req, res, body){
- //get a new auth token only if it needs to 
- if (spotifyInfo.scope != 'user-modify-playback-state')
- {
-   spotifyInfo.scope = 'user-modify-playback-state';
-   res.redirect('/');
- }
- //Make sure the volume isn't above 100
-  if (Number(req.query.volume) > 100){
-    spotifyInfo.volume = 100;
-  }else if (0 > Number(req.query.volume)){
-    spotifyInfo.volume = 0;
-  } else {
-    spotifyInfo.volume = Number(req.query.volume);
-  }
- 
-  const options = { 
-    url: 'https://api.spotify.com/v1/me/player/volume?volume_percent=' + spotifyInfo.volume,
-    headers: { 
-      'Accept':'application/json',
-      'Content-Type' : 'application/json',
-      'Authorization': 'Bearer ' + 
-      spotifyInfo.access_token },
-    json: true
-  };
-
-  request.put(options, function(error, response, body) {
-    console.log('Changed the Volume to ' + spotifyInfo.volume);
-  });
-});
-
-app.get('/seek', function(req,res, body){
-  spotifyInfo.scope = 'user-read-playback-state'
-  res.redirect('/');
-  
-  const options = {
-    url: 'https://api.spotify.com/v1/me/player/seek?position_ms=' + playbackInfo.currentMS,
-    headers: {
-    'Accept':'application/json',
-    'Content-Type' : 'application/json',
-    'Authorization': 'Bearer ' +
-    spotifyInfo.access_token },
-    json: true
-  };
-  
-  request.put(options, function(error, response, body) {
-    console.log('Seeking to ' + playbackInfo.currentMS);
-  });
-
-});
-
-app.get('/current-playback', function(req, res, body){
-  //Make sure the state is correct for the auth token
-  if (spotifyInfo.scope != 'user-read-playback-state')
-  {
-    spotifyInfo.scope = 'user-read-playback-state';
-    res.redirect('/');
-    res.redirect('/');
-    ggg();      
-  } else {
-    ggg();
-  }
-});
-
 //Things to add:
 // *** Should add specification for what artist or album x song / album has should be like &extra=artist:jon%20bellion
 // *** Add checking to see if a song/album is explicit and if it is, don't play, return song/album is explicit
-// *** Add working queue and checking to see what is currently playing
-app.get('/play', function(req, res, body){
-  res.redirect('/current-playback');
-  
-  //Assign the constants based on the query data and if nothing is found it will play all star lol
-  const playme = req.query.q;
-  const type = req.query.type;
-  var requestUrl = 'https://api.spotify.com/v1/search?q="all%20star"&type=track';
+// *** Add working queue and checking to see what is currently playing -- Talk to Owen about this after all the above is done
+app.get('/play', function(req, res, body){  
+  //Both the q and the type must be satisfied, otherwise we will throw an error
+  var playme = null;
+  var extra = '%20';
+  //The default will be a track if the user specifies nothing
+  var type = 'track';
+  if (req.query.q != null && req.query.type != null) {
+    playme = req.query.q;
+    type = req.query.type;
+  } else if (req.query.q == null){
+    //If it's null we will return with a 400 error and say that a song or artist or album is required
+  }
+
+  console.log(req.query.extra);
+  //Used so we can be more specific if the user specifies the album or artist
+  if (req.query.extra != null){
+    extra = extra + req.query.extra;
+    extra = extra.replace(' ',"\%20");
+    extra = extra.replace(':',"\%3a");
+  }
+
+  console.log(playme + extra)
+  var requestUrl = '';
 
   console.log(playme + ' ' + type);
   
-  //The way of getting either of these is different and needs to be randomized among the different stuff
+  //The artist and album will share similar requests, so we may 
   if (type == 'artist' || type == 'album') {
     if(type == 'album'){
-      requestUrl = 'https://api.spotify.com/v1/search?q="' + playme
-      + '"&type=album';
+      requestUrl = 'https://api.spotify.com/v1/search?query=' + playme + extra
+      + '&type=album';
     } else if (type == 'artist'){
-      requestUrl = 'https://api.spotify.com/v1/search?q=artist:"' + playme
-      + '"&type=album';
+      requestUrl = 'https://api.spotify.com/v1/search?query=artist:' + playme + extra
+      + '&type=album';
     }
     
     //Request data to be sent to spotify, returning a json of the track ids and stuff
@@ -327,10 +275,17 @@ app.get('/play', function(req, res, body){
       };
       //Make the request to spotify to recieve data
       request.get(options, function(error, response, body) {
+        //Randomly chooses one of the albums that was returned to play
         const position = Math.floor(Math.random() * body.albums.items.length);
+
+        //Randomly chooses a random song off of that album
         const randSong = Math.floor(Math.random() * body.albums.items[position].total_tracks);
+
+        //gets the URI of that chosen song
         const songUri = body.albums.items[position].uri;
-        const boptions = {
+
+        //Construct the json to send to spotify
+        const albumOptions = {
           url: 'https://api.spotify.com/v1/me/player/play',
           body: {
           "context_uri": songUri,
@@ -347,16 +302,16 @@ app.get('/play', function(req, res, body){
           json: true
           };
           
-          request.put(boptions, function(error, response, body){
-            console.log(response);
+          request.put(albumOptions, function(error, response, body){
+            console.log(error);
           });
       });
 
   } else if (type == 'track') {
     //Request data to be sent to spotify, returning a json of the track ids and stuff
     const options = {
-      url: 'https://api.spotify.com/v1/search?q="' + playme
-      + '"&type=track',
+      url: 'https://api.spotify.com/v1/search?q=' + playme + extra
+      + '&type=track',
       headers: {
       'Accept':'application/json',
       'Content-Type' : 'application/json',
@@ -364,33 +319,37 @@ app.get('/play', function(req, res, body){
       spotifyInfo.access_token },
       json: true
       };
-
+      console.log('https://api.spotify.com/v1/search?q=Halloween%20album%3AThe%20Separation&type=track')
+      console.log(options.url);
       //Make the request to spotify to recieve data
       request.get(options, function(error, response, body) {
-        var boptions = {};
-        var stuff = [];
+        var songToPlay = [];
+        console.log(body);
         //loop through all the items of the item list to find the track to play
         for (var i = 0; i < body.tracks.items.length; i++){
           //Check to see if any of the items in the list have that name
           if (body.tracks.items[i].name.toLowerCase() == playme){
             console.log('Found the ' + type + ' with name ' + body.tracks.items[i].name );
-            console.log('and the uri of ' + body.tracks.items[i].uri);
+            console.log('and the uri of ' + body.tracks.items[i].uri);            
 
-            //Get the current playback info to see what adjustments to the queue we have to make
-              //Make sure the state is correct for the auth token
-            console.log(playbackInfo);            
-
-            while (spotifyInfo.queue[0] != playbackInfo.currentUri)
-            {
-              spotifyInfo.queue.shift()
+            if (extra.search('album')){
+              if(!extra.search(body.tracks.items[i].album.name)){
+                continue;
+              }            
+            } else if (extra.search('artist')) {
+              if(!extra.search(body.tracks.items[i].album.artists[0].name)){
+                continue;
+              }
             }
 
-            spotifyInfo.queue.push(body.tracks.items[i].uri);
+            //Add the song to the array to play
+            songToPlay.push(body.tracks.items[i].uri)
 
-            boptions = {
+            //Tell spotify what song to play
+            const trackOptions = {
               url: 'https://api.spotify.com/v1/me/player/play',
               body: {
-              "uris" : spotifyInfo.queue,
+              "uris" : songToPlay,
               },
               headers: {
               'Accept':'application/json',
@@ -399,10 +358,9 @@ app.get('/play', function(req, res, body){
               spotifyInfo.access_token},
               json: true
               };
-            request.put(boptions, function(error, response, body){
-              console.log(body);
-              console.log('Playing the new queue / queue');
-
+            request.put(trackOptions, function(error, response, body){
+              console.log(error);
+              console.log('Playing song...');
             });
             break;
           }
@@ -411,7 +369,6 @@ app.get('/play', function(req, res, body){
   } else {
     console.log('You shouldn"t be here uh-oh');
   }
-
 });
 
 app.get('/change', function(req, res, body){
@@ -455,23 +412,3 @@ app.get('/change', function(req, res, body){
 });
 console.log('Listening on 8888');
 app.listen(8888);
-
-function ggg(){
-  console.log(spotifyInfo.scope);
-  const options = {
-    url: 'https://api.spotify.com/v1/me/player/currently-playing',
-    headers: {
-    'Accept':'application/json',
-    'Content-Type' : 'application/json',
-    'Authorization': 'Bearer ' +
-    spotifyInfo.access_token },
-    json: true
-  };
-    request.get(options, function(error, response, body){
-      console.log(body);
-      playbackInfo.currentMS = Number(body.progress_ms);
-      playbackInfo.currentUri = String(body.item.uri);
-      console.log('current ms: ' + playbackInfo.currentMS);
-      console.log('Error from current-playback' + body);
-    });
-}
