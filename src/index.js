@@ -332,13 +332,19 @@ app.get('/play', function(req, res, body){
             console.log('Found the ' + type + ' with name ' + body.tracks.items[i].name );
             console.log('and the uri of ' + body.tracks.items[i].uri);            
 
-            if (extra.search('album')){
-              if(!extra.search(body.tracks.items[i].album.name)){
-                continue;
-              }            
-            } else if (extra.search('artist')) {
-              if(!extra.search(body.tracks.items[i].album.artists[0].name)){
-                continue;
+            //If the extra is actually assigned
+            if (extra.search(':')) {
+              const albist = extra.split(':')
+              if (extra.search('album')){
+                if(albist[1] != body.tracks.items[i].album.name){
+                  console.log(ablist[1] + ' != ' + body.tracks.items[i].album.name)
+                  continue;
+                }            
+              } else if (extra.search('artist')) {
+                if(albist[1] != body.tracks.items[i].album.artists[0].name){
+                  console.log(ablist[1] + ' != ' + body.tracks.items[i].album.artists[0].name)
+                  continue;
+                }
               }
             }
 
