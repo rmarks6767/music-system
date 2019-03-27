@@ -281,6 +281,23 @@ app.get('/play', function(req, res, body){
         //Randomly chooses a random song off of that album
         const randSong = Math.floor(Math.random() * body.albums.items[position].total_tracks);
 
+
+        // //If the extra is actually assigned
+        // if (extra.search('\%3a')) {
+        //   const albist = extra.split('\%3a')
+        //   console.log(albist);
+        //   if ('album' == extra.search('album')){
+        //     if(albist[1] != body.tracks.items[i].album.name){
+        //       console.log(albist[1] + ' != ' + body.tracks.items[i].album.name + ' album')
+              
+        //     }            
+        //   } else if ('artist' == extra.search('artist')) {
+        //     if(albist[1] != body.tracks.items[i].album.artists[0].name){
+        //       console.log(albist[1] + ' != ' + body.tracks.items[i].album.artists[0].name + ' artist')
+              
+        //     }
+        //   }
+        // }
         //gets the URI of that chosen song
         const songUri = body.albums.items[position].uri;
 
@@ -333,16 +350,17 @@ app.get('/play', function(req, res, body){
             console.log('and the uri of ' + body.tracks.items[i].uri);            
 
             //If the extra is actually assigned
-            if (extra.search(':')) {
-              const albist = extra.split(':')
-              if (extra.search('album')){
+            if (extra.search('\%3a')) {
+              const albist = extra.split('\%3a')
+              console.log(albist);
+              if ('album' == extra.search('album')){
                 if(albist[1] != body.tracks.items[i].album.name){
-                  console.log(ablist[1] + ' != ' + body.tracks.items[i].album.name)
+                  console.log(albist[1] + ' != ' + body.tracks.items[i].album.name + ' album')
                   continue;
                 }            
-              } else if (extra.search('artist')) {
+              } else if ('artist' == extra.search('artist')) {
                 if(albist[1] != body.tracks.items[i].album.artists[0].name){
-                  console.log(ablist[1] + ' != ' + body.tracks.items[i].album.artists[0].name)
+                  console.log(albist[1] + ' != ' + body.tracks.items[i].album.artists[0].name + ' artist')
                   continue;
                 }
               }
