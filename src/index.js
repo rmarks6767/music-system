@@ -1,12 +1,3 @@
-/**
- * This is an example of a basic node.js script that performs
- * the Authorization Code oAuth2 flow to authenticate against
- * the Spotify Accounts.
- *
- * For more information, read
- * https://developer.spotify.com/web-api/authorization-guide/#authorization_code_flow
- */
-
 var express = require('express'); // Express web server framework
 var request = require('request'); // "Request" library
 var cors = require('cors');
@@ -256,7 +247,6 @@ app.get('/resume', function(req, res, body){
 });
 
 //Things to add:
-// *** Add checking to see if a song/album is explicit and if it is, don't play, return song/album is explicit
 // *** Add working queue and checking to see what is currently playing -- Talk to Owen about this after all the above is done
 app.get('/play', function(req, res, body){  
   //Both the q and the type must be satisfied, otherwise we will throw an error
@@ -326,15 +316,15 @@ app.get('/play', function(req, res, body){
           }   
           console.log('This is the song uri: ' + songUri);        
         }else {
-          //If the album or artist is specified, we'll find a song with that criteria
-          //Randomly chooses one of the albums that was returned to play
-          position = Math.floor(Math.random() * body.albums.items.length);
+            //If the album or artist is specified, we'll find a song with that criteria
+            //Randomly chooses one of the albums that was returned to play
+            position = Math.floor(Math.random() * body.albums.items.length);
 
-          //Randomly chooses a random song off of that album
-          randSong = Math.floor(Math.random() * body.albums.items[position].total_tracks);
+            //Randomly chooses a random song off of that album
+            randSong = Math.floor(Math.random() * body.albums.items[position].total_tracks);
 
-          //gets the URI of that chosen song
-          songUri = body.albums.items[position].uri;
+            //gets the URI of that chosen song
+            songUri = body.albums.items[position].uri;
         }
 
         //Construct the json to send to spotify
@@ -381,7 +371,7 @@ app.get('/play', function(req, res, body){
         //loop through all the items of the item list to find the track to play
         for (var i = 0; i < body.tracks.items.length; i++){
           //Check to see if any of the items in the list have that name
-          if (body.tracks.items[i].name.toLowerCase() == playme){
+          if (body.tracks.items[i].name.toLowerCase() == playme  && body.tracks.items[i].explicit == 'false'){
             console.log('Found the ' + type + ' with name ' + body.tracks.items[i].name );
             console.log('and the uri of ' + body.tracks.items[i].uri);            
 
