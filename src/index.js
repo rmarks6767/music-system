@@ -177,6 +177,38 @@ app.get('/refresh_token', function(req, res) {
   });
 });
 
+//Can update the volume of the current player
+app.get('/volume', function(req, res, body){
+  //get a new auth token only if it needs to 
+  if (spotifyInfo.scope != 'user-modify-playback-state')
+  {
+    spotifyInfo.scope = 'user-modify-playback-state';
+    res.redirect('/');
+  }
+  //Make sure the volume isn't above 100
+   if (Number(req.query.volume) > 100){
+     spotifyInfo.volume = 100;
+   }else if (0 > Number(req.query.volume)){
+     spotifyInfo.volume = 0;
+   } else {
+     spotifyInfo.volume = Number(req.query.volume);
+   }
+  
+   const options = { 
+     url: 'https://api.spotify.com/v1/me/player/volume?volume_percent=' + spotifyInfo.volume,
+     headers: { 
+       'Accept':'application/json',
+       'Content-Type' : 'application/json',
+       'Authorization': 'Bearer ' + 
+       spotifyInfo.access_token },
+     json: true
+   };
+ 
+   request.put(options, function(error, response, body) {
+     console.log('Changed the Volume to ' + spotifyInfo.volume);
+   });
+});
+
 //Pauses the currently playing song
 app.get('/pause', function(req, res, body){
   //get a new auth token only if it needs to 
@@ -224,7 +256,6 @@ app.get('/resume', function(req, res, body){
 });
 
 //Things to add:
-// *** Should add specification for what artist or album x song / album has should be like &extra=artist:jon%20bellion
 // *** Add checking to see if a song/album is explicit and if it is, don't play, return song/album is explicit
 // *** Add working queue and checking to see what is currently playing -- Talk to Owen about this after all the above is done
 app.get('/play', function(req, res, body){  
@@ -259,7 +290,7 @@ app.get('/play', function(req, res, body){
       requestUrl = 'https://api.spotify.com/v1/search?query=' + playme + extra
       + '&type=album';
     } else if (type == 'artist'){
-      requestUrl = 'https://api.spotify.com/v1/search?query=artist:' + playme + extra
+      requestUrl = 'https://api.spotify.com/v1/search?query=artist:' + playme
       + '&type=album';
     }
     
@@ -273,33 +304,38 @@ app.get('/play', function(req, res, body){
       spotifyInfo.access_token},
       json: true
       };
+      
       //Make the request to spotify to recieve data
       request.get(options, function(error, response, body) {
-        //Randomly chooses one of the albums that was returned to play
-        const position = Math.floor(Math.random() * body.albums.items.length);
+        //Assign the 
+        var randSong = 0;
+        var position = Math.floor(Math.random() * body.albums.items.length);
+        var songUri = '';
 
-        //Randomly chooses a random song off of that album
-        const randSong = Math.floor(Math.random() * body.albums.items[position].total_tracks);
+        //If the extra is actually assigned and the type is an album
+        if (extra.search('\%3a') == '\%3a' && type == 'album') {
+          var albist = extra.split('\%3a')
+          console.log(albist);
+          albist[1] = albist[1].replace('%20',' ');
+          songUri = body.albums.items[position].uri;
+          while(albist[1] != body.albums.items[position].artists[0].name.toLowerCase()){
+            //Randomly chooses one of the albums that was returned to play
+            position = Math.floor(Math.random() * body.albums.items.length);
+            randSong = Math.floor(Math.random() * body.albums.items[position].total_tracks);
+            songUri = body.albums.items[position].uri;
+          }   
+          console.log('This is the song uri: ' + songUri);        
+        }else {
+          //If the album or artist is specified, we'll find a song with that criteria
+          //Randomly chooses one of the albums that was returned to play
+          position = Math.floor(Math.random() * body.albums.items.length);
 
+          //Randomly chooses a random song off of that album
+          randSong = Math.floor(Math.random() * body.albums.items[position].total_tracks);
 
-        // //If the extra is actually assigned
-        // if (extra.search('\%3a')) {
-        //   const albist = extra.split('\%3a')
-        //   console.log(albist);
-        //   if ('album' == extra.search('album')){
-        //     if(albist[1] != body.tracks.items[i].album.name){
-        //       console.log(albist[1] + ' != ' + body.tracks.items[i].album.name + ' album')
-              
-        //     }            
-        //   } else if ('artist' == extra.search('artist')) {
-        //     if(albist[1] != body.tracks.items[i].album.artists[0].name){
-        //       console.log(albist[1] + ' != ' + body.tracks.items[i].album.artists[0].name + ' artist')
-              
-        //     }
-        //   }
-        // }
-        //gets the URI of that chosen song
-        const songUri = body.albums.items[position].uri;
+          //gets the URI of that chosen song
+          songUri = body.albums.items[position].uri;
+        }
 
         //Construct the json to send to spotify
         const albumOptions = {
@@ -320,7 +356,7 @@ app.get('/play', function(req, res, body){
           };
           
           request.put(albumOptions, function(error, response, body){
-            console.log(error);
+            console.log('We got hereeeeee');
           });
       });
 
@@ -405,10 +441,10 @@ app.get('/change', function(req, res, body){
   var seekUrl = 'do nothing and will not do anything to the current playback'
 
   //if the user wants to go to the next song
-  if (req.query.forward){
+  if (req.query.forward == 'true'){
     seekUrl = 'https://api.spotify.com/v1/me/player/next';
     //if the user wants to go to the previous song
-  } else if (!req.query.forward) { 
+  } else if (req.query.forward == 'false') { 
     seekUrl = 'https://api.spotify.com/v1/me/player/previous';
   } else {
     console.log('incorrect user input!');
@@ -434,5 +470,6 @@ app.get('/change', function(req, res, body){
     }
   });
 });
+
 console.log('Listening on 8888');
 app.listen(8888);
