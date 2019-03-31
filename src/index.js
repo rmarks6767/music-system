@@ -113,6 +113,11 @@ app.get('/callback', function(req, res) {
         // use the access token to access the Spotify Web API
         request.get(options, function(error, response, body) {
           console.log(body);
+          const resp = {
+            status_code : 200,
+            message: 'Authorization successful', 
+          }
+          res.json(resp);
         });
 
         // we can also pass the token to the browser to make requests from there
@@ -260,29 +265,25 @@ app.get('/resume', function(req, res, body){
 app.get('/play', function(req, res, body){  
   //Both the q and the type must be satisfied, otherwise we will throw an error
   var playme = null;
-  var extra = '%20';
+  var extra = '';
   //The default will be a track if the user specifies nothing
   var type = 'track';
+  //Make sure that either of the required queries are filled
   if (req.query.q != '' && req.query.type != '' 
   && req.query.q != null && req.query.type != null 
   && req.query.q != null && req.query.type != ''
   && req.query.q != '' && req.query.type != null) {
+
     playme = req.query.q;
     type = req.query.type;
-
-    console.log(req.query.extra);
     //Used so we can be more specific if the user specifies the album or artist
-    if (req.query.extra != null){
+    if (req.query.extra != null && extra != ''){
+      extra = '%20';
       extra = extra + req.query.extra;
       extra = extra.replace(' ',"\%20");
       extra = extra.replace(':',"\%3a");
     }
-
-    console.log(playme + extra)
-    var requestUrl = '';
-
-    console.log(playme + ' ' + type);
-    
+    var requestUrl = '';    
     //The artist and album will share similar requests, so we may 
     if (type == 'artist' || type == 'album') {
       if(type == 'album'){
@@ -315,7 +316,6 @@ app.get('/play', function(req, res, body){
             //If the extra is actually assigned and the type is an album
             if (extra.search('\%3a') == '\%3a' && type == 'album') {
               var albist = extra.split('\%3a')
-              console.log(albist);
               albist[1] = albist[1].replace('%20',' ');
               songUri = body.albums.items[position].uri;
               while(albist[1] != body.albums.items[position].artists[0].name.toLowerCase()){
@@ -324,7 +324,8 @@ app.get('/play', function(req, res, body){
                 randSong = Math.floor(Math.random() * body.albums.items[position].total_tracks);
                 songUri = body.albums.items[position].uri;
               }   
-              console.log('This is the song uri: ' + songUri);        
+              console.log('Found the ' + type + ' with name ' + body.albums.items[position].artists[0].name);
+              console.log('and the uri of ' + body.albums.items[position].uri);          
             }else {
                 //If the album or artist is specified, we'll find a song with that criteria
                 //Randomly chooses one of the albums that was returned to play
@@ -356,7 +357,11 @@ app.get('/play', function(req, res, body){
               };
               
             request.put(albumOptions, function(error, response, body){
-              console.log('We got hereeeeee');
+              console.log('Playing ' + type + ': ' + playme);
+              const resp = {
+                status_code: 200,
+              }
+              res.json(resp);
             });
           } else {
             //The request returned nothing so we must return that
@@ -383,12 +388,11 @@ app.get('/play', function(req, res, body){
         console.log('https://api.spotify.com/v1/search?q=Halloween%20album%3AThe%20Separation&type=track')
         console.log(options.url);
         //Make the request to spotify to recieve data
-        request.get(options, function(response, body) {
+        request.get(options, function(error, response, body) {
           if (body.tracks.items.length > 0){
             var songToPlay = [];
             //loop through all the items of the item list to find the track to play
             for (var i = 0; i < body.tracks.items.length; i++){
-              console.log('loop: ' + i);
               //Check to see if any of the items in the list have that name
               if (body.tracks.items[i].name.toLowerCase() == playme){  //&& body.tracks.items[i].explicit == 'false'){
                 console.log('Found the ' + type + ' with name ' + body.tracks.items[i].name );
@@ -397,15 +401,14 @@ app.get('/play', function(req, res, body){
                 //If the extra is actually assigned
                 if (extra.search('\%3a')) {
                   const albist = extra.split('\%3a')
-                  console.log(albist);
                   if ('album' == extra.search('album')){
+                    //If the specified album is not associated with the current URI we will continue
                     if(albist[1] != body.tracks.items[i].album.name){
-                      console.log(albist[1] + ' != ' + body.tracks.items[i].album.name + ' album')
                       continue;
                     }            
                   } else if ('artist' == extra.search('artist')) {
+                    //If the specified artist is not associated with the current URI we will continue
                     if(albist[1] != body.tracks.items[i].album.artists[0].name){
-                      console.log(albist[1] + ' != ' + body.tracks.items[i].album.artists[0].name + ' artist')
                       continue;
                     }
                   }
@@ -427,8 +430,12 @@ app.get('/play', function(req, res, body){
                   spotifyInfo.access_token},
                   json: true
                   };
-                request.put(trackOptions, function(response, body){
-                  console.log('Playing song...');
+                request.put(trackOptions, function(error, response, body){
+                  console.log('Playing the song: ' + playme);
+                  const resp = {
+                    status_code: 200,
+                  }
+                  res.json(resp)
                 });
                 break;
               }
@@ -439,7 +446,7 @@ app.get('/play', function(req, res, body){
               status_code: 404,
               error: 'No songs were found by spotify',
             }
-            response.json(resp);
+            res.json(resp);
           }
         });
       } else {
