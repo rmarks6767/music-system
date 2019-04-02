@@ -69,7 +69,7 @@ app.get('/', function(req, res) {
     }));
 });
 
-//
+//After the main / happens, it redirects to here
 app.get('/callback', function(req, res) {
 
   // your application requests refresh and access tokens
@@ -105,20 +105,15 @@ app.get('/callback', function(req, res) {
         spotifyInfo.access_token = body.access_token,
         spotifyInfo.refresh_token = body.refresh_token;
 
-        var options = {
+        var toptions = {
           url: 'https://api.spotify.com/v1/me',
           headers: { 'Authorization': 'Bearer ' + spotifyInfo.access_token },
           json: true
         };
 
         // use the access token to access the Spotify Web API
-        request.get(options, function(error, response, body) {
+        request.get(toptions, function(error, response, body) {
           console.log(body);
-          const resp = {
-            status_code : 200,
-            message: 'Authorization successful', 
-          }
-          res.json(resp);
         });
 
         // we can also pass the token to the browser to make requests from there
@@ -133,10 +128,27 @@ app.get('/callback', function(req, res) {
             json: true
           };
              request.get(options, function(error, response, body) {
-              //spotifyInfo.device = body.devices[0]
-              //console.log(spotifyInfo.device.id);
-              //console.log(body)
-              //console.log(spotifyInfo.device);
+              if (body != null){
+                if (body.length < 1){
+                  const resp = {
+                    status_code : 404,
+                    error: 'Auth successful, but no active devices found', 
+                  }
+                  res.json(resp);
+                } else {
+                  const resp = {
+                    status_code : 200,
+                    message: 'Device found and auth successful', 
+                  }
+                  res.json(resp);
+                }
+              } else {
+                const resp = {
+                  status_code : 444,
+                  message: 'Authentication failed', 
+                }
+                res.json(resp);
+              }
           });
         
       } else {
@@ -203,14 +215,29 @@ app.get('/volume', function(req, res, body){
     };
 
     request.put(options, function(error, response, body) {
-      console.log('Changed the Volume to ' + spotifyInfo.volume);
+      console.log(response.statusCode);
+      if (!error && response.statusCode === 204) {
+        console.log('Changed the Volume to ' + spotifyInfo.volume);
+        const resp = {
+          status_code: 200,
+          message: 'Changed the Volume to ' + spotifyInfo.volume,
+        }
+        res.json(resp);
+      } else {
+        console.log('No Device active to change volume');
+        const resp = {
+          status_code: 404,
+          message: 'No Device active to change volume',
+        }
+        res.json(resp);
+      }
     });
   } else {
-    const response = {
+    const resp = {
       status_code: 400,
-      error: 'No volume amount provided',
+      message: 'No volume amount provided',
     }
-    res.json(response);
+    res.json(resp);
   }
   
 });
@@ -234,7 +261,19 @@ app.get('/pause', function(req, res, body){
   };
 
   request.put(options, function(error, response, body) {
-    console.log('We paused dawg');
+    if (!error && response.statusCode === 204) {
+      const resp = {
+        status_code : 200,
+        message: 'Pausing song', 
+      }
+      res.json(resp);
+    } else {
+      const resp = {
+        status_code : 404,
+        message: 'Song to pause not found', 
+      }
+      res.json(resp);
+    }
   });
 });
 
@@ -257,8 +296,19 @@ app.get('/resume', function(req, res, body){
   };
 
   request.put(options, function(error, response, body) {
-    console.log('Resumed');
-  });
+    if (!error && response.statusCode === 204) {
+      const resp = {
+        status_code : 200,
+        message: 'Resuming song', 
+      }
+      res.json(resp);
+    } else {
+      const resp = {
+        status_code : 404,
+        message: 'Song to resume not found', 
+      }
+      res.json(resp);
+    }  });
 });
 
 //Things to add:
@@ -309,7 +359,7 @@ app.get('/play', function(req, res, body){
           
           //Make the request to spotify to recieve data
           request.get(options, function(error, response, body) {
-            if (body.albums.items.length > 0){
+            if (!error && response.statusCode === 200) {
               //Assign the variables
               var randSong = 0;
               var position = Math.floor(Math.random() * body.albums.items.length);
@@ -361,18 +411,18 @@ app.get('/play', function(req, res, body){
                 };
                 
               request.put(albumOptions, function(error, response, body){
-                if (counter > 20){
-                  console.log('No songs were found by Spotify');
-                  const resp = {
-                    status_code: 404,
-                    error: 'No songs were found by spotify',
-                  }
-                  res.json(resp);
-                } else {
+                if (!error && response.statusCode === 200) {
                   console.log('Playing ' + type + ': ' + playme);
                   const resp = {
                     status_code: 200,
-                    response: 'Playing ' + type + ' ' + playme,
+                    message: 'Playing ' + type + ' ' + playme,
+                  }
+                  res.json(resp);
+                } else {
+                  console.log('No songs were found by Spotify');
+                  const resp = {
+                    status_code: 404,
+                    message: 'No songs were found by spotify',
                   }
                   res.json(resp);
                 }
@@ -381,7 +431,7 @@ app.get('/play', function(req, res, body){
               //The request returned nothing so we must return that
               const resp = {
                 status_code: 404,
-                error: 'No songs were found by spotify',
+                message: 'No songs were found by spotify',
               }
               res.json(resp);
             }
@@ -446,7 +496,7 @@ app.get('/play', function(req, res, body){
                     console.log('Playing the song: ' + playme);
                     const resp = {
                       status_code: 200,
-                      response: 'Playing ' + type + ' ' + playme,
+                      message: 'Playing ' + type + ' ' + playme,
                     }
                     res.json(resp)
                   });
@@ -457,7 +507,7 @@ app.get('/play', function(req, res, body){
               //The request returned nothing so we must return that
               const resp = {
                 status_code: 404,
-                error: 'No songs were found by spotify',
+                message: 'No songs were found by spotify',
               }
               res.json(resp);
             }
@@ -469,14 +519,14 @@ app.get('/play', function(req, res, body){
       //If it's null we will return with a 400 error and say that a song or artist or album is required
       const response = {
         status_code: 400,
-        error: 'Missing a Query Parameter',
+        message: 'Missing a Query Parameter',
       }
       res.json(response);
     }
   } else {
     const resp = {
       status_code : 401,
-      error: 'Authorization not occurred, please authorize',
+      message: 'Authorization not occurred, please authorize',
     }
     res.json(resp);
   }
@@ -484,43 +534,59 @@ app.get('/play', function(req, res, body){
 });
 
 app.get('/change', function(req, res, body){
-  if (spotifyInfo.scope != 'user-modify-playback-state')
+  if (req.query.forward != null
+    && req.query.forward != '' 
+    && (req.query.forward == 'true' 
+    || req.query.forward == 'false'))
   {
-    spotifyInfo.scope = 'user-modify-playback-state';
-    res.redirect('/');
-  }
-
-  var seekUrl = 'do nothing and will not do anything to the current playback'
-
-  //if the user wants to go to the next song
-  if (req.query.forward == 'true'){
-    seekUrl = 'https://api.spotify.com/v1/me/player/next';
-    //if the user wants to go to the previous song
-  } else if (req.query.forward == 'false') { 
-    seekUrl = 'https://api.spotify.com/v1/me/player/previous';
-  } else {
-    console.log('incorrect user input!');
-  }
-
-  const options = { 
-    url: seekUrl,
-    headers: { 
-      'Accept':'application/json',
-      'Content-Type' : 'application/json',
-      'Authorization': 'Bearer ' + 
-      spotifyInfo.access_token },
-    json: true
-  };
-
-  request.post(options, function(error, response, body) {
-    if (req.query.forward){
-      console.log('Went to the next song');
-    } else if(!req.query.forward){
-      console.log('Went to the previous song');
-    } else {
-      console.log('We don wrong!!');
+    if (spotifyInfo.scope != 'user-modify-playback-state')
+    {
+      spotifyInfo.scope = 'user-modify-playback-state';
+      res.redirect('/');
     }
-  });
+
+    var seekUrl = 'do nothing and will not do anything to the current playback'
+
+    //if the user wants to go to the next song
+    if (req.query.forward == 'true'){
+      seekUrl = 'https://api.spotify.com/v1/me/player/next';
+      //if the user wants to go to the previous song
+    } else if (req.query.forward == 'false') { 
+      seekUrl = 'https://api.spotify.com/v1/me/player/previous';
+    }
+
+    const options = { 
+      url: seekUrl,
+      headers: { 
+        'Accept':'application/json',
+        'Content-Type' : 'application/json',
+        'Authorization': 'Bearer ' + 
+        spotifyInfo.access_token },
+      json: true
+    };
+
+    request.post(options, function(error, response, body) {
+      if (!error && response.statusCode === 204){
+        const resp = {
+          status_code : 200,
+          message : 'Going to ' + req.query.forward + ' song',
+        }
+        res.json(resp);
+      } else {
+        const resp = {
+          status_code : 404,
+          message : 'Active player not found'
+        }
+        res.json(resp);
+      }
+    });
+  } else {
+    const resp = {
+      status_code : 400,
+      message : 'Invalid query parameter'
+    }
+    res.json(resp);
+  }
 });
 
 console.log('Listening on 8888');
