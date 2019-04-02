@@ -3,13 +3,8 @@ var request = require('request'); // "Request" library
 var cors = require('cors');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
-var player = require('play-sound');
-var path = require('path');
-var fs = require('fs');
-var time = require('moment');
 
 var app = express();
-const router = express.Router();
 
 app.get('/home', function(req,res){
   var token = spotifyInfo.access_token;
