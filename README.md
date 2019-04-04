@@ -14,6 +14,21 @@ npm install cookie-parser
 npm install play-sound
 ```
 
-## Building Project
+## Building Project and Approach
 
-## TO DO things:
+
+## End Points for NodeJs api:
+
+### Callback
+```
+localhost:8888/
+```
+This will redirect
+
+### Play
+
+### Pause / Resume
+
+### Change (Next / Previous)
+
+### Volume 

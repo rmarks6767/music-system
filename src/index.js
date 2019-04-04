@@ -406,7 +406,7 @@ app.get('/play', function(req, res, body){
                 };
                 
               request.put(albumOptions, function(error, response, body){
-                if (!error && response.statusCode === 200) {
+                if (!error && response.statusCode === 204) {
                   console.log('Playing ' + type + ': ' + playme);
                   const resp = {
                     status_code: 200,
@@ -584,5 +584,5 @@ app.get('/change', function(req, res, body){
   }
 });
 
-console.log('Listening on 8888');
+console.log('Listening on 0');
 app.listen(8888);
