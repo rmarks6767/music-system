@@ -316,12 +316,12 @@ app.get('/play', function(req, res, body){
     //The default will be a track if the user specifies nothing
     var type = 'track';
     //Make sure that either of the required queries are filled
-    if (req.query.q) {
+    if (req.query.q && req.query.type) {
 
       playme = req.query.q;
       type = req.query.type;
       //Used so we can be more specific if the user specifies the album or artist
-      if (req.query.extra != null || extra != ''){
+      if (req.query.extra){
         extra = '%20';
         extra = extra + req.query.extra;
         extra = extra.replace(' ',"\%20");
@@ -526,8 +526,7 @@ app.get('/play', function(req, res, body){
 });
 
 app.get('/change', function(req, res, body){
-  if (req.query.forward != null
-    && req.query.forward != '' 
+  if (req.query.forward 
     && (req.query.forward == 'true' 
     || req.query.forward == 'false'))
   {

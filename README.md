@@ -21,6 +21,12 @@ npm install play-sound
 ```http://musicsystem-imagine-rit-music-player.cs.house/callback```
 #### This will redirect and authenticate the Spotify Player.  This must be called after the player has been opened and run once, otherwise it will not be able to find the active device.
 
+#### Possible Error Codes:
+
+##### 200 - Success in auth and active device found
+##### 404 - Authentication success but no active devices
+##### 444 - Authentication failed
+
 ### Refresh Token
 ```
 http://musicsystem-imagine-rit-music-player.cs.house/refresh_token
@@ -48,12 +54,24 @@ http://musicsystem-imagine-rit-music-player.cs.house/refresh_token
 ```http://musicsystem-imagine-rit-music-player.cs.house/play?q=jon%20bellion&type=artist&extra=album:the%20human%20condition```
 ##### This is an example of one of the endpoints you can hit.  Each of the pieces is separated using an & and all spaces between things must have %20.
 
+#### Possible Errors and Status Codes:
+
+##### 200 - Success Everything Connected Properly and Song Found
+##### 400 - Missing one of the Required Parameters (Type or Query)
+##### 401 - Authorization has not occured, please call the '/' endpoint
+##### 404 - No songs found by Spotify
+
 ### Pause / Resume
 ```/pause```
 #### Pauses the currently playing music
+
 ```/resume```
 #### Resumes the music that was playing
 
+#### Possible Error Codes:
+
+##### 200 - Success, song paused / played
+##### 404 - Authorization not occured / player not found, call the '/' endpoint
 ### Change (Next / Previous)
 ```/change?forward=true```
 #### Setting the forward parameter will cause the player to go forwards or backwards, given that there are songs in the queue or it is just shuffling music
@@ -61,3 +79,8 @@ http://musicsystem-imagine-rit-music-player.cs.house/refresh_token
 ### Volume
 ```/volume?volume=69```
 #### Calling the volume endpoint and setting the volume parameter equal to a number will cause the player to go to that volume.  If it is over or under it will default to the closest value.
+#### Possible Error Codes:
+
+##### 200 - Song Successfully changed
+##### 400 - Invalid / missing query parameter
+##### 404 - Player not found, call the endpoint '/' to reauthenticate the player
