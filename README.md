@@ -1,5 +1,5 @@
 # Futurustic Car Music System
-Imagine RIT project that takes Google DialogueFlow requests through query data passed locally into a Node.js application.  The application establishes a connection to Spotify by sending the Client Id and the Client Secret that is associated with the app.  This request returns an access token that can be used to access Spotify's library and play songs that the user requests. 
+Imagine RIT project that takes Google DialogueFlow requests through query data passed locally into a Node.js application.  The application establishes a connection to Spotify by sending the Client Id and the Client Secret that is associated with the app.  This request returns an access token that can be used to access Spotify's library and play songs that the user requests.
 
 ## Installation
 ```
@@ -21,14 +21,30 @@ npm install play-sound
 
 ### Callback
 ```
-localhost:8888/
+http://musicsystem-imagine-rit-music-player.cs.house/
 ```
-This will redirect
+#### redirects to:
+```
+http://musicsystem-imagine-rit-music-player.cs.house/callback
+```
+#### This will redirect and authenticate the Spotify Player.  This must be called after the player has been opened and run once, otherwise it will not be able to find the active device.
+
+### Refresh
+```
+http://musicsystem-imagine-rit-music-player.cs.house/refresh
+```
+#### This will need to be called once every 60 minutes to re authenticate the player.  Calling this will get a new auth token, the item that needs to be refreshed.
 
 ### Play
+
+#### q=
+
+#### type=
+
+####
 
 ### Pause / Resume
 
 ### Change (Next / Previous)
 
-### Volume 
+### Volume
