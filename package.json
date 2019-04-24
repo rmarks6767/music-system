@@ -4,8 +4,7 @@
   "description": "I will edit this later (I'll forget)",
   "main": "src/index.js",
   "scripts": {
-    "build": "babel src -d dist",
-    "start": "npm run build && node dist/index.js"
+    "start": "node src/index.js"
   },
   "author": "rmarks6767",
   "dependencies": {
