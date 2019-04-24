@@ -316,10 +316,7 @@ app.get('/play', function(req, res, body){
     //The default will be a track if the user specifies nothing
     var type = 'track';
     //Make sure that either of the required queries are filled
-    if (req.query.q != '' && req.query.type != '' 
-    && req.query.q != null && req.query.type != null 
-    && req.query.q != null && req.query.type != ''
-    && req.query.q != '' && req.query.type != null) {
+    if (req.query.q) {
 
       playme = req.query.q;
       type = req.query.type;
