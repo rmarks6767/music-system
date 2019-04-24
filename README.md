@@ -21,9 +21,9 @@ npm install play-sound
 ```http://musicsystem-imagine-rit-music-player.cs.house/callback```
 #### This will redirect and authenticate the Spotify Player.  This must be called after the player has been opened and run once, otherwise it will not be able to find the active device.
 
-### Refresh
+### Refresh Token
 ```
-http://musicsystem-imagine-rit-music-player.cs.house/refresh
+http://musicsystem-imagine-rit-music-player.cs.house/refresh_token
 ```
 #### This will need to be called once every 60 minutes to re authenticate the player.  Calling this will get a new auth token, the item that needs to be refreshed.
 
