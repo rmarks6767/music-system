@@ -16,9 +16,9 @@ npm install play-sound
 ## End Points for NodeJs api:
 
 ### Initial Call
-
 ```http://musicsystem-imagine-rit-music-player.cs.house/```
-#### Redirects to: ```http://musicsystem-imagine-rit-music-player.cs.house/callback```
+#### Redirects to: 
+```http://musicsystem-imagine-rit-music-player.cs.house/callback```
 #### This will redirect and authenticate the Spotify Player.  This must be called after the player has been opened and run once, otherwise it will not be able to find the active device.
 
 ### Refresh
@@ -28,6 +28,7 @@ http://musicsystem-imagine-rit-music-player.cs.house/refresh
 #### This will need to be called once every 60 minutes to re authenticate the player.  Calling this will get a new auth token, the item that needs to be refreshed.
 
 ### Play
+
 #### Base Endpoint and Example:
 ##### Base: ```http://musicsystem-imagine-rit-music-player.cs.house/play?```
 ##### In this example, we are searching for the artist Jon Bellion and we specify this with the track.  The extra is used to specify either a 
@@ -45,9 +46,18 @@ http://musicsystem-imagine-rit-music-player.cs.house/refresh
 ##### The extra parameter is an optional parameter that may be used to specify a track or album using an artist or album.  If this is not included it will get the default that is returned from Spotify.
 #### All together:
 ```http://musicsystem-imagine-rit-music-player.cs.house/play?q=jon%20bellion&type=artist&extra=album:the%20human%20condition```
-##### This is an example of one of the endpoints you can hit.  Each of the pieces is separated using a & and all spaces between things must have %20.
+##### This is an example of one of the endpoints you can hit.  Each of the pieces is separated using an & and all spaces between things must have %20.
+
 ### Pause / Resume
+```/pause```
+#### Pauses the currently playing music
+```/resume```
+#### Resumes the music that was playing
 
 ### Change (Next / Previous)
+```/change?forward=true```
+#### Setting the forward parameter will cause the player to go forwards or backwards, given that there are songs in the queue or it is just shuffling music
 
 ### Volume
+```/volume?volume=69```
+#### Calling the volume endpoint and setting the volume parameter equal to a number will cause the player to go to that volume.  If it is over or under it will default to the closest value.
