@@ -187,13 +187,13 @@ app.get('/volume', function(req, res, body){
 
     if (req.query.volume == 'up'){
       //Make sure the volume isn't above 100
-      if (req.query.volume > 100){
+      if (req.query.volume >= 100){
         spotifyInfo.volume = 100;
       } else {
         spotifyInfo.volume += 10;
       }
     } else if (req.query.volume == 'down') {
-      if (0 > req.query.volume){
+      if (0 >= req.query.volume){
         spotifyInfo.volume = 0;
       } else{
         spotifyInfo.volume -= 10;
@@ -201,7 +201,7 @@ app.get('/volume', function(req, res, body){
     }
 
     console.log('Volume set to: '+ spotifyInfo.volume);
-    
+
     const options = { 
       url: 'https://api.spotify.com/v1/me/player/volume?volume_percent=' + spotifyInfo.volume,
       headers: { 
