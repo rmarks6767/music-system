@@ -109,9 +109,8 @@ app.get('/callback', function(req, res) {
         // use the access token to access the Spotify Web API
         request.get(toptions, function(error, response, body) {
           console.log(body);
-        });
 
-        // we can also pass the token to the browser to make requests from there
+          // we can also pass the token to the browser to make requests from there
           //get the device id that just opened that site
           const options = {
             url: 'https://api.spotify.com/v1/me/player/devices',
@@ -146,6 +145,9 @@ app.get('/callback', function(req, res) {
                 res.json(resp);
               }
           });
+        });
+
+        
         
       } else {
         res.redirect('/#' +
