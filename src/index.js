@@ -191,6 +191,8 @@ app.get('/volume', function(req, res, body){
       spotifyInfo.volume -= 10;
     }
 
+    console.log('Volume set to: '+ spotifyInfo.volume);
+
     //Make sure the volume isn't above 100
     if (Number(req.query.volume) > 100){
       spotifyInfo.volume = 100;
