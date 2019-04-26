@@ -185,16 +185,17 @@ app.get('/refresh_token', function(req, res) {
 app.get('/volume', function(req, res, body){
   if (req.query.volume != null){
     console.log(spotifyInfo.volume);
+    console.warn(req.query.volume);
     if (req.query.volume == 'up'){
       //Make sure the volume isn't above 100
-      if (Number(req.query.volume) + 10 >= 100){
+      if (spotifyInfo.volume >= 100) {
         spotifyInfo.volume = 100;
       } else {
         spotifyInfo.volume += 10;
         console.log('increment');
       }
     } else if (req.query.volume == 'down') {
-      if (0 >= Number(req.query.volume) - 10){
+      if (0 >= spotifyInfo.volume){
         spotifyInfo.volume = 0;
       } else{
         spotifyInfo.volume -= 10;
