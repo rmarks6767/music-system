@@ -184,7 +184,7 @@ app.get('/refresh_token', function(req, res) {
 //Can update the volume of the current player
 app.get('/volume', function(req, res, body){
   if (req.query.volume != null){
-
+    console.log(spotifyInfo.volume);
     if (req.query.volume == 'up'){
       //Make sure the volume isn't above 100
       if (Number(req.query.volume) >= 100){
