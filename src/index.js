@@ -184,12 +184,13 @@ app.get('/refresh_token', function(req, res) {
 //Can update the volume of the current player
 app.get('/volume', function(req, res, body){
   if (req.query.volume != null){
-    //get a new auth token only if it needs to 
-    if (spotifyInfo.scope != 'user-modify-playback-state')
-    {
-      spotifyInfo.scope = 'user-modify-playback-state';
-      res.redirect('/');
+
+    if (req.query.volume == 'up'){
+      spotifyInfo.volume += 10;
+    } else if (req.query.volume == 'down') {
+      spotifyInfo.volume -= 10;
     }
+
     //Make sure the volume isn't above 100
     if (Number(req.query.volume) > 100){
       spotifyInfo.volume = 100;
