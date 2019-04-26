@@ -122,8 +122,8 @@ app.get('/callback', function(req, res) {
             json: true
           };
              request.get(options, function(error, response, body) {
-               console.log(response.statusCode)
               if (body != null){
+                console.log(response.statusCode);
                 if (body.length < 1){
                   const resp = {
                     status_code : 404,
@@ -146,9 +146,6 @@ app.get('/callback', function(req, res) {
               }
           });
         });
-
-        
-        
       } else {
         res.redirect('/#' +
           querystring.stringify({
