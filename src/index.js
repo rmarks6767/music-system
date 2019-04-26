@@ -187,16 +187,18 @@ app.get('/volume', function(req, res, body){
 
     if (req.query.volume == 'up'){
       //Make sure the volume isn't above 100
-      if (req.query.volume >= 100){
+      if (Number(req.query.volume) >= 100){
         spotifyInfo.volume = 100;
       } else {
         spotifyInfo.volume += 10;
+        console.log('increment');
       }
     } else if (req.query.volume == 'down') {
-      if (0 >= req.query.volume){
+      if (0 >= Number(req.query.volume)){
         spotifyInfo.volume = 0;
       } else{
         spotifyInfo.volume -= 10;
+        console.log('decrement');
       }
     }
 
