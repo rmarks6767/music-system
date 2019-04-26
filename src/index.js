@@ -123,6 +123,7 @@ app.get('/callback', function(req, res) {
             json: true
           };
              request.get(options, function(error, response, body) {
+               console.log(response.statusCode)
               if (body != null){
                 if (body.length < 1){
                   const resp = {
@@ -583,5 +584,5 @@ app.get('/change', function(req, res, body){
   }
 });
 
-console.log('Listening on 8080');
+console.log('Listening on 8080...');
 app.listen(8080);
