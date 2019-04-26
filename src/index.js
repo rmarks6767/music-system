@@ -186,22 +186,22 @@ app.get('/volume', function(req, res, body){
   if (req.query.volume != null){
 
     if (req.query.volume == 'up'){
-      spotifyInfo.volume += 10;
+      //Make sure the volume isn't above 100
+      if (req.query.volume > 100){
+        spotifyInfo.volume = 100;
+      } else {
+        spotifyInfo.volume += 10;
+      }
     } else if (req.query.volume == 'down') {
-      spotifyInfo.volume -= 10;
+      if (0 > req.query.volume){
+        spotifyInfo.volume = 0;
+      } else{
+        spotifyInfo.volume -= 10;
+      }
     }
 
     console.log('Volume set to: '+ spotifyInfo.volume);
-
-    //Make sure the volume isn't above 100
-    if (Number(req.query.volume) > 100){
-      spotifyInfo.volume = 100;
-    }else if (0 > Number(req.query.volume)){
-      spotifyInfo.volume = 0;
-    } else {
-      spotifyInfo.volume = Number(req.query.volume);
-    }
-
+    
     const options = { 
       url: 'https://api.spotify.com/v1/me/player/volume?volume_percent=' + spotifyInfo.volume,
       headers: { 
