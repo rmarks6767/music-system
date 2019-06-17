@@ -5,13 +5,7 @@ Imagine RIT project that takes Google DialogueFlow requests through query data p
 ```
 git clone https://github.com/rmarks6767/music-system.git
 sudo dnf install nodejs
-npm i -g babelrc-install
-npm install express
-npm install request
-npm install cors
-npm install querystring
-npm install cookie-parser
-npm install play-sound
+npm install
 ```
 ## End Points for NodeJs api:
 
