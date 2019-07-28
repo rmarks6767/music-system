@@ -1,8 +1,7 @@
-var { Spotify } = require('../index');
 var { MakeString } = require('./generate-random-string');
 var request = require('request'); // "Request" library
 
-Spotify.app.get('/', function(req, res) {
+const Authorize = function Authorize(req, res) {
 
     var state = MakeString(16);
     res.cookie(Spotify.stateKey, state);
@@ -16,15 +15,15 @@ Spotify.app.get('/', function(req, res) {
         redirect_uri: Spotify.redirect_uri,
         state: state
       }));
-  });
+  };
   
   //After the main / happens, it redirects to here
-  Spotify.app.get('/callback', function(req, res) {
+const Callback = function Callback(req, res, client_id, client_secret, redirect_uri) {
   
     // your application requests refresh and access tokens
     // after checking the state parameter
   
-    Spotify.code = req.query.code || null;
+    const code = req.query.code || null;
     var state = req.query.state || null;
     var storedState = req.cookies ? req.cookies[stateKey] : null;
   
@@ -38,12 +37,12 @@ Spotify.app.get('/', function(req, res) {
       var authOptions = {
         url: 'https://accounts.spotify.com/api/token',
         form: {
-          code: Spotify.code,
-          redirect_uri: Spotify.redirect_uri,
+          code: code,
+          redirect_uri: redirect_uri,
           grant_type: 'authorization_code'
         },
         headers: {
-          'Authorization': 'Basic ' + (new Buffer(Spotify.client_id + ':' + Spotify.client_secret).toString('base64'))
+          'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'))
         },
         json: true
       };
@@ -108,10 +107,10 @@ Spotify.app.get('/', function(req, res) {
         }
       });
     }
-  });
+  };
   
   //Refreshes the token that is required
-  Spotify.app.get('/refresh_token', function(req, res) {
+const Refresh = function Refresh(req, res) {
   
     // requesting access token from refresh token
     Spotify.refresh_token = req.query.refresh_token;
@@ -133,4 +132,8 @@ Spotify.app.get('/', function(req, res) {
         });
       }
     });
-  });
+  };
+
+module.exports = {
+  Authorize, Callback, Refresh
+}

@@ -2,7 +2,7 @@ var { Spotify } = require('../index');
 var request = require('request'); // "Request" library
 
 //Can update the volume of the current player
-Spotify.app.get('/volume', function(req, res, body){
+function Volume(req, res){
     if (req.query.volume){
       if (req.query.volume == 'up'){
         //Make sure the volume isn't above 100
@@ -51,4 +51,8 @@ Spotify.app.get('/volume', function(req, res, body){
       }
       res.json(resp);
     }
-  });
+  };
+
+  module.exports = {
+    Volume
+  }

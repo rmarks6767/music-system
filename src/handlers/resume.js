@@ -2,7 +2,7 @@ var { Spotify } = require('../index');
 var request = require('request'); // "Request" library
 
 //Resumes the current song of the player
-Spotify.app.get('/resume', function(req, res, body){
+function Resume(req, res){
     //get a new auth token only if it needs to 
     if (Spotify.scope != 'user-modify-playback-state')
     {
@@ -33,4 +33,8 @@ Spotify.app.get('/resume', function(req, res, body){
         }
         res.json(resp);
       }  });
-  });
+  };
+
+  module.exports = {
+    Resume
+  }

@@ -3,7 +3,7 @@ var request = require('request'); // "Request" library
 
 //Things to add:
 // *** Add working queue and checking to see what is currently playing -- Talk to Owen about this after all the above is done
-Spotify.app.get('/play', function(req, res, body){  
+function Play(req, res){  
     if (Spotify.auth) {
       //Both the q and the type must be satisfied, otherwise we will throw an error
       var playme = null;
@@ -217,5 +217,9 @@ Spotify.app.get('/play', function(req, res, body){
       }
       res.json(resp);
     }
-  });
+  };
+
+  module.exports = {
+    Play
+  }
   

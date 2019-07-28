@@ -1,7 +1,7 @@
 var { Spotify } = require('../index');
 var request = require('request'); // "Request" library
 
-Spotify.app.get('/change', function(req, res, body){
+function Change(req, res){
     if (req.query.forward 
       && (req.query.forward == 'true' 
       || req.query.forward == 'false'))
@@ -54,4 +54,8 @@ Spotify.app.get('/change', function(req, res, body){
       }
       res.json(resp);
     }
-  });
+  }
+
+  module.exports = {
+    Change
+  }

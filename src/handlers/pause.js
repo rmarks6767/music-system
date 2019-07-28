@@ -2,7 +2,7 @@ var { Spotify } = require('../index');
 var request = require('request'); // "Request" library
 
 //Pauses the currently playing song
-Spotify.app.get('/pause', function(req, res, body){
+function Pause(req, res){
     //get a new auth token only if it needs to 
     if (Spotify.scope != 'user-modify-playback-state')
     {
@@ -34,4 +34,8 @@ Spotify.app.get('/pause', function(req, res, body){
         res.json(resp);
       }
     });
-  });
+  };
+
+  module.exports = {
+    Pause
+  }
