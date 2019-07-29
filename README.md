@@ -1,5 +1,5 @@
 # Futurustic Car Music System
-Imagine RIT project that takes Google DialogueFlow requests through query data passed locally into a Node.js application.  The application establishes a connection to Spotify by sending the Client Id and the Client Secret that is associated with the app.  This request returns an access token that can be used to access Spotify's library and play songs that the user requests.
+Imagine RIT project that takes Google DialogueFlow requests through query data passed locally into a Node.js application.  The application establishes a connection to spotify by sending the Client Id and the Client Secret that is associated with the app.  This request returns an access token that can be used to access spotify's library and play songs that the user requests.
 
 ## Installation
 ```
@@ -13,7 +13,7 @@ npm install
 ```http://musicsystem-imagine-rit-music-player.cs.house/```
 #### Redirects to: 
 ```http://musicsystem-imagine-rit-music-player.cs.house/callback```
-#### This will redirect and authenticate the Spotify Player.  This must be called after the player has been opened and run once, otherwise it will not be able to find the active device.
+#### This will redirect and authenticate the spotify Player.  This must be called after the player has been opened and run once, otherwise it will not be able to find the active device.
 
 #### Possible Error Codes:
 
@@ -43,7 +43,7 @@ http://musicsystem-imagine-rit-music-player.cs.house/refresh_token
 #### Extra Parameter 
 ```extra=album:/artist:{album}{artist}```
 ```extra=album:the%20human%20condition```
-##### The extra parameter is an optional parameter that may be used to specify a track or album using an artist or album.  If this is not included it will get the default that is returned from Spotify.
+##### The extra parameter is an optional parameter that may be used to specify a track or album using an artist or album.  If this is not included it will get the default that is returned from spotify.
 #### All together:
 ```http://musicsystem-imagine-rit-music-player.cs.house/play?q=jon%20bellion&type=artist&extra=album:the%20human%20condition```
 ##### This is an example of one of the endpoints you can hit.  Each of the pieces is separated using an & and all spaces between things must have %20.
@@ -53,7 +53,7 @@ http://musicsystem-imagine-rit-music-player.cs.house/refresh_token
 ##### 200 - Success Everything Connected Properly and Song Found
 ##### 400 - Missing one of the Required Parameters (Type or Query)
 ##### 401 - Authorization has not occured, please call the '/' endpoint
-##### 404 - No songs found by Spotify
+##### 404 - No songs found by spotify
 
 ### Pause / Resume
 ```/pause```

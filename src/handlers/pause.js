@@ -1,12 +1,11 @@
-var { Spotify } = require('../index');
 var request = require('request'); // "Request" library
 
 //Pauses the currently playing song
-function Pause(req, res){
+function Pause(req, res, spotify){
     //get a new auth token only if it needs to 
-    if (Spotify.scope != 'user-modify-playback-state')
+    if (spotify.scope != 'user-modify-playback-state')
     {
-      Spotify.scope = 'user-modify-playback-state';
+      spotify.scope = 'user-modify-playback-state';
       res.redirect('/');
     }
     const options = { 
@@ -15,7 +14,7 @@ function Pause(req, res){
         'Accept':'application/json',
         'Content-Type' : 'application/json',
         'Authorization': 'Bearer ' + 
-        Spotify.access_token },
+        spotify.access_token },
       json: true
     };
   

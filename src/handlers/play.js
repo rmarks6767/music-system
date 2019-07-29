@@ -1,10 +1,9 @@
-var { Spotify } = require('../index');
 var request = require('request'); // "Request" library
 
 //Things to add:
 // *** Add working queue and checking to see what is currently playing -- Talk to Owen about this after all the above is done
-function Play(req, res){  
-    if (Spotify.auth) {
+function Play(req, res, spotify){  
+    if (spotify.auth) {
       //Both the q and the type must be satisfied, otherwise we will throw an error
       var playme = null;
       var extra = '';
@@ -40,7 +39,7 @@ function Play(req, res){
             'Accept':'application/json',
             'Content-Type' : 'application/json',
             'Authorization': 'Bearer ' +
-            Spotify.access_token},
+            spotify.access_token},
             json: true
             };
             
@@ -93,7 +92,7 @@ function Play(req, res){
                   'Accept':'application/json',
                   'Content-Type' : 'application/json',
                   'Authorization': 'Bearer ' +
-                  Spotify.access_token},
+                  spotify.access_token},
                   json: true
                   };
                   
@@ -106,7 +105,7 @@ function Play(req, res){
                     }
                     res.json(resp);
                   } else {
-                    console.log('No songs were found by Spotify');
+                    console.log('No songs were found by spotify');
                     const resp = {
                       status_code: 404,
                       message: 'No songs were found by spotify',
@@ -133,7 +132,7 @@ function Play(req, res){
             'Accept':'application/json',
             'Content-Type' : 'application/json',
             'Authorization': 'Bearer ' +
-            Spotify.access_token },
+            spotify.access_token },
             json: true
             };
             //Make the request to spotify to recieve data
@@ -176,7 +175,7 @@ function Play(req, res){
                       'Accept':'application/json',
                       'Content-Type' : 'application/json',
                       'Authorization': 'Bearer ' +
-                      Spotify.access_token},
+                      spotify.access_token},
                       json: true
                       };
                     request.put(trackOptions, function(error, response, body){

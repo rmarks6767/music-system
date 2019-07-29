@@ -1,14 +1,13 @@
-var { Spotify } = require('../index');
 var request = require('request'); // "Request" library
 
-function Change(req, res){
+function Change(req, res, spotify){
     if (req.query.forward 
       && (req.query.forward == 'true' 
       || req.query.forward == 'false'))
     {
-      if (Spotify.scope != 'user-modify-playback-state')
+      if (spotify.scope != 'user-modify-playback-state')
       {
-        Spotify.scope = 'user-modify-playback-state';
+        spotify.scope = 'user-modify-playback-state';
         res.redirect('/');
       }
   
@@ -28,7 +27,7 @@ function Change(req, res){
           'Accept':'application/json',
           'Content-Type' : 'application/json',
           'Authorization': 'Bearer ' + 
-          Spotify.access_token },
+          spotify.access_token },
         json: true
       };
   

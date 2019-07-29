@@ -1,4 +1,4 @@
-export function Makestring(length) {
+function MakeString(length) {
     var text = '';
     var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   
@@ -6,4 +6,8 @@ export function Makestring(length) {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
     }
     return text;
+}
+
+module.exports = {
+  MakeString
 }

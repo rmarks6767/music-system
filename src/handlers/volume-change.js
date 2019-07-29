@@ -1,31 +1,30 @@
-var { Spotify } = require('../index');
 var request = require('request'); // "Request" library
 
 //Can update the volume of the current player
-function Volume(req, res){
+function Volume(req, res, spotify){
     if (req.query.volume){
       if (req.query.volume == 'up'){
         //Make sure the volume isn't above 100
-        if (Spotify.volume >= 100) {
-          Spotify.volume = 100;
+        if (spotify.volume >= 100) {
+          spotify.volume = 100;
         } else {
-          Spotify.volume += 10;
+          spotify.volume += 10;
         }
       } else if (req.query.volume == 'down') {
-        if (0 >= Spotify.volume){
-          Spotify.volume = 0;
+        if (0 >= spotify.volume){
+          spotify.volume = 0;
         } else{
-          Spotify.volume -= 10;
+          spotify.volume -= 10;
         }
       }
     
       const options = { 
-        url: 'https://api.spotify.com/v1/me/player/volume?volume_percent=' + Spotify.volume,
+        url: 'https://api.spotify.com/v1/me/player/volume?volume_percent=' + spotify.volume,
         headers: { 
           'Accept':'application/json',
           'Content-Type' : 'application/json',
           'Authorization': 'Bearer ' + 
-          Spotify.access_token },
+          spotify.access_token },
         json: true
       };
   
@@ -33,7 +32,7 @@ function Volume(req, res){
         if (!error && response.statusCode === 204) {
           const resp = {
             status_code: 200,
-            message: 'Changed the Volume to ' + Spotify.volume,
+            message: 'Changed the Volume to ' + spotify.volume,
           }
           res.json(resp);
         } else {
