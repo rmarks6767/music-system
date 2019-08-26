@@ -12,14 +12,18 @@ var { Spotify } = require('./spotify.js');
 
 app = express();
 var spotify = new Spotify(process.env.CLIENTKEY, process.env.SECRETKEY, process.env.REDIRECT);
-console.log(spotify.client_id)
-
 // Definition of the endpoints
 
 // Auth endpoints
-app.get('/', (req, res) => Authorize(req, res, spotify));
-app.get('/refresh_token', (req, res, spotify) => Refresh(req, res, spotify))
-app.get('/callback', (req, res, spotify) => Callback(req, res, spotify));
+app.get('/', (req, res) => {
+   Authorize(req, res, spotify)
+});
+app.get('/refresh_token', (req, res) => {
+   Refresh(req, res, spotify)
+});
+app.get('/callback', (req, res) => {
+   Callback(req, res, spotify)
+});
 
 // Select Song
 app.get('/play', (req, res, spotify) => Play(req, res, spotify));
@@ -38,7 +42,7 @@ var port = 8888;
 app.use(express.static(__dirname + '/public'))
    .use(cors())
    .use(cookieParser())
-   .listen(port, c => console.log(`Listening on ${port}...`));
+   .listen(port, console.log(`Listening on ${port}...`));
 
 
    
